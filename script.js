@@ -18,6 +18,9 @@ const CONFIG = {
     ]
 };
 
+// CRITICAL: Explicit dimensions for correct export
+svg.setAttribute('width', CONFIG.width);
+svg.setAttribute('height', CONFIG.height);
 svg.setAttribute('viewBox', `0 0 ${CONFIG.width} ${CONFIG.height}`);
 
 function createEl(tag, attrs = {}) {
@@ -84,10 +87,8 @@ svg.appendChild(createEl('rect', { x: 40, y: 190, width: 1520, height: 280, rx: 
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
-    // Module background
     g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 730, height: 220, rx: 8, fill: '#ffffff', stroke: '#cbd5e1', 'stroke-width': 1 }));
     
-    // Module Label (TOP LEFT ALIGNMENT as per pic)
     const label = createEl('text', { x: startX + 10, y: startY + 10, 'text-anchor': 'start', style: 'font-family: monospace; font-size: 15px; fill: #1e293b; font-weight: 700; letter-spacing: 2px;' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
@@ -108,7 +109,7 @@ function drawModule(startX, startY, moduleNum, prefix) {
         const row = isEven ? 1 : 0;
         const groupOffset = pairIndex >= 4 ? 40 : 0;
         const px = startX + pairIndex * 82 + groupOffset;
-        const py = startY + row * 85 + 75; // Shifting ports down to create more header space
+        const py = startY + row * 85 + 75;
         const portId = `${prefix}/${i + 1}`;
         const pg = createEl('g');
         pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portWidth, height: CONFIG.portHeight, rx: 2, fill: '#fff', stroke: '#475569', 'stroke-width': 1 }));
@@ -189,7 +190,6 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
     let d;
     if (isToOUT) {
         const arc = 150;
-        // More horizontal arc exit from the module header area
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y + arc}, ${end.x} ${end.y}`;
     } else if (fromSide === 'top' && toSide === 'top') {
         const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
@@ -209,7 +209,6 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
         t.textContent = label;
         
         if (isToOUT) {
-            // Position "OUT" label exactly as in the new reference pic
             const lx = start.x + (end.x - start.x) * 0.12;
             const ly = start.y - 45;
             t.setAttribute('x', lx);
@@ -294,19 +293,33 @@ drawLine('2/13', 'Cybernet Network OUT', 7, 'dashed', 'OUT');
 drawLine('2/16', 'MIR4', 7, 'dashed', 'Mirror');
 
 document.getElementById('download-png').addEventListener('click', () => {
+    // CRITICAL: Ensure SVG has explicit dimensions before export
+    svg.setAttribute('width', CONFIG.width);
+    svg.setAttribute('height', CONFIG.height);
+    
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    const scale = 4;
+    const scale = 4; // High DPI export
+    
     canvas.width = CONFIG.width * scale;
     canvas.height = CONFIG.height * scale;
+    
     img.onload = () => {
-        ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0);
+        
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-module-align.png';
-        link.href = canvas.toDataURL('image/png'); link.click();
+        link.download = 'niagara-switch-13-full-diagram.png';
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
     };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    
+    // Ensure all styles and attributes are captured correctly
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
+    img.src = url;
 });
