@@ -4,8 +4,7 @@ const NS = "http://www.w3.org/2000/svg";
 const CONFIG = {
     width: 1600,
     height: 900,
-    portSize: 44,
-    // Colors from the reference image
+    portSize: 42,
     flowColors: [
         '#8b5cf6', // Purple
         '#3b82f6', // Blue
@@ -16,7 +15,7 @@ const CONFIG = {
         '#ec4899', // Pink
         '#6366f1'  // Indigo
     ],
-    mirrorColor: '#fd7e14' // Orange as per prompt
+    mirrorColor: '#fd7e14' // Orange
 };
 
 svg.setAttribute('viewBox', `0 0 ${CONFIG.width} ${CONFIG.height}`);
@@ -65,38 +64,42 @@ function drawPill(x, y, label) {
     nodes[label] = { x, y, w: 240, h: 60 };
 }
 
-drawPill(450, 100, 'Cybernet Network IN');
-drawPill(1150, 100, 'Cybernet Network OUT');
+drawPill(400, 80, 'Cybernet Network IN');
+drawPill(1200, 80, 'Cybernet Network OUT');
 
 // Switch Frame
-svg.appendChild(createEl('rect', { x: 50, y: 220, width: 1500, height: 180, class: 'module-box' }));
+svg.appendChild(createEl('rect', { x: 50, y: 180, width: 1500, height: 220, class: 'module-box' }));
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
-    g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 680, height: 120, class: 'module-inner-box' }));
-    const label = createEl('text', { x: startX + 320, y: startY - 30, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 14px; fill: #64748b' });
+    g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 680, height: 160, class: 'module-inner-box' }));
+    const label = createEl('text', { x: startX + 320, y: startY - 40, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 14px; fill: #64748b' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
     
+    // SEQUENCE MATCHING PICTURE: Odds on top, Evens on bottom
     for (let i = 0; i < 16; i++) {
-        const col = i % 8;
-        const row = Math.floor(i / 8);
+        const isEven = (i + 1) % 2 === 0;
+        const col = Math.floor(i / 2);
+        const row = isEven ? 1 : 0;
+        
         const px = startX + col * 85;
-        const py = startY + row * 60;
+        const py = startY + row * 70;
         const portId = `${prefix}/${i + 1}`;
+        
         const pg = createEl('g');
         pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portSize, height: CONFIG.portSize, class: 'port-rect' }));
-        const pt = createEl('text', { x: px + 22, y: py + 26, class: 'port-label' });
+        const pt = createEl('text', { x: px + 21, y: py + 25, class: 'port-label' });
         pt.textContent = portId;
         pg.appendChild(pt);
         g.appendChild(pg);
-        nodes[portId] = { x: px + 22, y: py + 22, w: CONFIG.portSize, h: CONFIG.portSize };
+        nodes[portId] = { x: px + 21, y: py + 21, w: CONFIG.portSize, h: CONFIG.portSize };
     }
     svg.appendChild(g);
 }
 
-drawModule(100, 260, 1, '0');
-drawModule(820, 260, 2, '2');
+drawModule(100, 220, 1, '0');
+drawModule(820, 220, 2, '2');
 
 // Servers
 const servers = [
@@ -120,19 +123,34 @@ servers.forEach(s => {
     nodes[s.id] = { x: s.x, y: s.y, w: 180, h: 60 };
 });
 
-function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false, fromSide = 'bottom', toSide = 'top') {
-    const start = getPoint(from, fromSide);
-    const end = getPoint(to, toSide);
+function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) {
+    const startSide = nodes[from].y < nodes[to].y ? 'bottom' : 'top';
+    const endSide = nodes[from].y < nodes[to].y ? 'top' : 'bottom';
+    
+    // For horizontal lines between ports
+    let finalStartSide = startSide;
+    let finalEndSide = endSide;
+    if (Math.abs(nodes[from].y - nodes[to].y) < 10) {
+        finalStartSide = 'bottom';
+        finalEndSide = 'bottom';
+    }
+
+    const start = getPoint(from, finalStartSide);
+    const end = getPoint(to, finalEndSide);
     const color = colorIndex === 'mirror' ? CONFIG.mirrorColor : CONFIG.flowColors[colorIndex];
     const markerId = colorIndex === 'mirror' ? CONFIG.flowColors.length : colorIndex;
     
     const path = createEl('path', {
         class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${markerId})`,
-        'stroke-dasharray': style === 'dashed' ? '5 5' : '0'
+        'stroke-dasharray': style === 'dashed' ? '6 4' : '0'
     });
     
-    const cp1y = start.y + (end.y - start.y) * 0.4;
-    const cp2y = start.y + (end.y - start.y) * 0.6;
+    // Refined Bezier for clarity
+    const distY = Math.abs(end.y - start.y);
+    const cpY = distY > 50 ? 0.5 : 1.2; // Adjust curve steepness
+    const cp1y = start.y + (end.y - start.y) * cpY;
+    const cp2y = start.y + (end.y - start.y) * (1 - cpY);
+    
     const d = `M ${start.x} ${start.y} C ${start.x} ${cp1y}, ${end.x} ${cp2y}, ${end.x} ${end.y}`;
     path.setAttribute('d', d);
     svg.appendChild(path);
@@ -140,7 +158,7 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false, 
     if (bidirectional) {
         const rPath = createEl('path', {
             class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${markerId})`,
-            'stroke-dasharray': style === 'dashed' ? '5 5' : '0',
+            'stroke-dasharray': style === 'dashed' ? '6 4' : '0',
             d: `M ${end.x + 8} ${end.y} C ${end.x + 8} ${cp2y + 8}, ${start.x + 8} ${cp1y + 8}, ${start.x + 8} ${start.y}`
         });
         svg.appendChild(rPath);
@@ -148,73 +166,73 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false, 
 }
 
 // --- MODULE 1 FLOWS ---
-// Flow 1 (Purple)
+// Flow 1
 drawLine('Cybernet Network IN', '0/9', 0, 'solid');
-drawLine('0/9', '0/7', 0, 'solid');
-drawLine('0/9', '0/8', 0, 'solid');
-drawLine('0/7', 'DPI9', 0, 'solid', true);
-drawLine('0/7', '0/11', 0, 'solid');
-drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed'); // EXIT
+drawLine('0/9', '0/7', 0, 'dashed'); // Logical
+drawLine('0/9', '0/8', 0, 'dashed'); // Logical
+drawLine('0/7', 'DPI9', 0, 'dashed', true); // Logical/Server
+drawLine('0/7', '0/11', 0, 'dashed'); // Logical
+drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed'); // Exit
 drawLine('0/10', 'MIR1', 'mirror', 'dashed');
 
-// Flow 2 (Blue)
+// Flow 2
 drawLine('Cybernet Network IN', '0/11', 1, 'solid');
-drawLine('0/11', '0/5', 1, 'solid');
-drawLine('0/11', '0/6', 1, 'solid');
-drawLine('0/5', 'DPI9', 1, 'solid', true);
-drawLine('0/5', '0/9', 1, 'solid');
-drawLine('0/9', 'Cybernet Network OUT', 1, 'dashed'); // EXIT
+drawLine('0/11', '0/5', 1, 'dashed');
+drawLine('0/11', '0/6', 1, 'dashed');
+drawLine('0/5', 'DPI9', 1, 'dashed', true);
+drawLine('0/5', '0/9', 1, 'dashed');
+drawLine('0/9', 'Cybernet Network OUT', 1, 'dashed');
 drawLine('0/12', 'MIR1', 'mirror', 'dashed');
 
-// Flow 3 (Cyan)
+// Flow 3
 drawLine('Cybernet Network IN', '0/13', 2, 'solid');
-drawLine('0/13', '0/3', 2, 'solid');
-drawLine('0/13', '0/6', 2, 'solid');
-drawLine('0/3', 'DPI10', 2, 'solid', true);
-drawLine('0/3', '0/15', 2, 'solid');
-drawLine('0/15', 'Cybernet Network OUT', 2, 'dashed'); // EXIT
+drawLine('0/13', '0/3', 2, 'dashed');
+drawLine('0/13', '0/6', 2, 'dashed');
+drawLine('0/3', 'DPI10', 2, 'dashed', true);
+drawLine('0/3', '0/15', 2, 'dashed');
+drawLine('0/15', 'Cybernet Network OUT', 2, 'dashed');
 drawLine('0/14', 'MIR2', 'mirror', 'dashed');
 
-// Flow 4 (Emerald)
+// Flow 4
 drawLine('Cybernet Network IN', '0/15', 3, 'solid');
-drawLine('0/15', '0/1', 3, 'solid');
-drawLine('0/15', '0/8', 3, 'solid');
-drawLine('0/1', 'DPI10', 3, 'solid', true);
-drawLine('0/1', '0/13', 3, 'solid');
-drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed'); // EXIT
+drawLine('0/15', '0/1', 3, 'dashed');
+drawLine('0/15', '0/8', 3, 'dashed');
+drawLine('0/1', 'DPI10', 3, 'dashed', true);
+drawLine('0/1', '0/13', 3, 'dashed');
+drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed');
 drawLine('0/16', 'MIR2', 'mirror', 'dashed');
 
 // --- MODULE 2 FLOWS ---
-// Flow 1 (Amber)
-drawLine('Cybernet Network IN', '2/9', 4, 'solid'); // Prompt says Cybernet to 2/9
-drawLine('2/9', '2/1', 4, 'solid');
-drawLine('2/1', 'DPA11', 4, 'solid', true);
-drawLine('2/1', '2/11', 4, 'solid');
-drawLine('2/11', 'Cybernet Network OUT', 4, 'dashed'); // EXIT
+// Flow 1
+drawLine('Cybernet Network IN', '2/9', 4, 'solid');
+drawLine('2/9', '2/1', 4, 'dashed');
+drawLine('2/1', 'DPA11', 4, 'dashed', true);
+drawLine('2/1', '2/11', 4, 'dashed');
+drawLine('2/11', 'Cybernet Network OUT', 4, 'dashed');
 drawLine('2/10', 'MIR1', 'mirror', 'dashed');
 
-// Flow 2 (Red)
+// Flow 2
 drawLine('Cybernet Network IN', '2/11', 5, 'solid');
-drawLine('2/11', '2/3', 5, 'solid');
-drawLine('2/3', 'DPA11', 5, 'solid', true);
-drawLine('2/3', '2/9', 5, 'solid');
-drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed'); // EXIT
+drawLine('2/11', '2/3', 5, 'dashed');
+drawLine('2/3', 'DPA11', 5, 'dashed', true);
+drawLine('2/3', '2/9', 5, 'dashed');
+drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed');
 drawLine('2/12', 'MIR3', 'mirror', 'dashed');
 
-// Flow 3 (Pink)
+// Flow 3
 drawLine('Cybernet Network IN', '2/13', 6, 'solid');
-drawLine('2/13', '2/5', 6, 'solid');
-drawLine('2/5', 'DPA12', 6, 'solid', true);
-drawLine('2/5', '2/15', 6, 'solid');
-drawLine('2/15', 'Cybernet Network OUT', 6, 'dashed'); // EXIT
+drawLine('2/13', '2/5', 6, 'dashed');
+drawLine('2/5', 'DPA12', 6, 'dashed', true);
+drawLine('2/5', '2/15', 6, 'dashed');
+drawLine('2/15', 'Cybernet Network OUT', 6, 'dashed');
 drawLine('2/14', 'MIR4', 'mirror', 'dashed');
 
-// Flow 4 (Indigo)
+// Flow 4
 drawLine('Cybernet Network IN', '2/15', 7, 'solid');
-drawLine('2/15', '2/7', 7, 'solid');
-drawLine('2/7', 'DPA12', 7, 'solid', true);
-drawLine('2/7', '2/13', 7, 'solid');
-drawLine('2/13', 'Cybernet Network OUT', 7, 'dashed'); // EXIT
+drawLine('2/15', '2/7', 7, 'dashed');
+drawLine('2/7', 'DPA12', 7, 'dashed', true);
+drawLine('2/7', '2/13', 7, 'dashed');
+drawLine('2/13', 'Cybernet Network OUT', 7, 'dashed');
 drawLine('2/16', 'MIR4', 'mirror', 'dashed');
 
 // Export functionality
@@ -230,7 +248,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-smart.png';
+        link.download = 'niagara-switch-13-pro.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
