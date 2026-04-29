@@ -3,7 +3,7 @@ const NS = "http://www.w3.org/2000/svg";
 
 const CONFIG = {
     width: 1600,
-    height: 950, // Slightly taller
+    height: 1000, // Even taller for bottom arcs
     portWidth: 70,
     portHeight: 35,
     flowColors: [
@@ -41,16 +41,12 @@ svg.appendChild(defs);
 const nodes = {};
 const connectionCount = {};
 
-// Specialized point selector to keep lines CLEAR of port labels
-function getPoint(nodeId, side = 'bottom', isPhysical = false) {
+function getPoint(nodeId, side = 'bottom') {
     const node = nodes[nodeId];
     if (!node) return { x: 0, y: 0 };
-    
     connectionCount[nodeId] = (connectionCount[nodeId] || 0) + 1;
     const count = connectionCount[nodeId];
-    
-    // Spread lines across the width of the port
-    const spread = (count - 1) * 10 - 20; 
+    const spread = (count - 1) * 12 - 20; 
     
     if (side === 'top') return { x: node.x + spread, y: node.y - node.h / 2 };
     if (side === 'bottom') return { x: node.x + spread, y: node.y + node.h / 2 };
@@ -72,7 +68,7 @@ drawPill(450, 70, 'Cybernet Network IN');
 drawPill(1150, 70, 'Cybernet Network OUT');
 
 // Switch Frame
-svg.appendChild(createEl('rect', { x: 50, y: 190, width: 1500, height: 200, class: 'module-box' }));
+svg.appendChild(createEl('rect', { x: 50, y: 190, width: 1500, height: 180, class: 'module-box' }));
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
@@ -80,7 +76,7 @@ function drawModule(startX, startY, moduleNum, prefix) {
     g.appendChild(createEl('line', { x1: startX + 338, y1: startY - 15, x2: startX + 338, y2: startY + 135, stroke: '#cbd5e1', 'stroke-width': 1 }));
 
     const label = createEl('text', { x: startX + 340, y: startY - 25, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 11px; fill: #94a3b8; font-weight: 700;' });
-    label.textContent = `MODULE ${moduleNum} | PORTS 1-16`;
+    label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
     
     for (let i = 0; i < 16; i++) {
@@ -126,14 +122,14 @@ function drawServer(s) {
 }
 
 const serverList = [
-    { id: 'DPI9', x: 300, y: 550, label: 'DPI-9' },
-    { id: 'DPI10', x: 550, y: 550, label: 'DPI-10' },
-    { id: 'DPI11', x: 1050, y: 550, label: 'DPI-11' },
-    { id: 'DPI12', x: 1300, y: 550, label: 'DPI-12' },
-    { id: 'MIR1', x: 300, y: 800, label: 'MIRROR DPI-1' },
-    { id: 'MIR2', x: 550, y: 800, label: 'MIRROR DPI-2' },
-    { id: 'MIR3', x: 1050, y: 800, label: 'MIRROR DPI-3' },
-    { id: 'MIR4', x: 1300, y: 800, label: 'MIRROR DPI-4' }
+    { id: 'DPI9', x: 300, y: 650, label: 'DPI-9' },
+    { id: 'DPI10', x: 550, y: 650, label: 'DPI-10' },
+    { id: 'DPI11', x: 1050, y: 650, label: 'DPI-11' },
+    { id: 'DPI12', x: 1300, y: 650, label: 'DPI-12' },
+    { id: 'MIR1', x: 300, y: 850, label: 'MIRROR DPI-1' },
+    { id: 'MIR2', x: 550, y: 850, label: 'MIRROR DPI-2' },
+    { id: 'MIR3', x: 1050, y: 850, label: 'MIRROR DPI-3' },
+    { id: 'MIR4', x: 1300, y: 850, label: 'MIRROR DPI-4' }
 ];
 
 serverList.forEach(drawServer);
@@ -142,14 +138,15 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
     const fromNode = nodes[from];
     const toNode = nodes[to];
     
-    // SMART ROUTING: Entry points always top, Exit points always bottom
+    // NEW ROUTING: Arcs go BELOW the ports for port-to-port connections
     let fromSide = fromNode.y < toNode.y ? 'bottom' : 'top';
     let toSide = fromNode.y < toNode.y ? 'top' : 'bottom';
     
-    // Internal Port-to-Port should always arc ABOVE or BELOW to stay clear
-    if (from.includes('/') && to.includes('/')) {
-        fromSide = 'top';
-        toSide = 'top';
+    // IF port-to-port, arc BELOW
+    const isInternal = from.includes('/') && to.includes('/');
+    if (isInternal) {
+        fromSide = 'bottom';
+        toSide = 'bottom';
     }
 
     const start = getPoint(from, fromSide);
@@ -160,12 +157,11 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
     const path = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${markerId})`, 'stroke-dasharray': style === 'dashed' ? '5 5' : '0' });
     
     let d;
-    if (from.includes('/') && to.includes('/')) {
-        // High Arc for Port-to-Port to keep it CLEAR
-        const arcHeight = Math.abs(end.x - start.x) * 0.4 + 50;
-        d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arcHeight}, ${end.x} ${start.y - arcHeight}, ${end.x} ${end.y}`;
+    if (isInternal) {
+        // High Arc BELOW for Port-to-Port
+        const arcDepth = Math.abs(end.x - start.x) * 0.2 + 80;
+        d = `M ${start.x} ${start.y} C ${start.x} ${start.y + arcDepth}, ${end.x} ${start.y + arcDepth}, ${end.x} ${end.y}`;
     } else {
-        // Standard Curve
         const midY = (start.y + end.y) / 2;
         d = `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`;
     }
@@ -174,12 +170,13 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
     svg.appendChild(path);
 
     if (bidirectional) {
-        const rPath = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${markerId})`, 'stroke-dasharray': style === 'dashed' ? '5 5' : '0', d: `M ${end.x + 8} ${end.y} C ${end.x + 8} ${end.y + 100}, ${start.x + 8} ${start.y + 100}, ${start.x + 8} ${start.y}` });
+        const rPath = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${markerId})`, 'stroke-dasharray': style === 'dashed' ? '5 5' : '0', d: `M ${end.x + 8} ${end.y} C ${end.x + 8} ${end.y + 60}, ${start.x + 8} ${start.y + 60}, ${start.x + 8} ${start.y}` });
         svg.appendChild(rPath);
     }
 }
 
-// MODULE 1 FLOWS
+// Flow Mappings
+// M1 FLOWS
 drawLine('Cybernet Network IN', '0/9', 0, 'solid');
 drawLine('0/9', '0/7', 0, 'dashed');
 drawLine('0/9', '0/8', 0, 'dashed');
@@ -212,7 +209,7 @@ drawLine('0/1', '0/13', 3, 'dashed');
 drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed');
 drawLine('0/16', 'MIR2', 3, 'dashed');
 
-// MODULE 2 FLOWS
+// M2 FLOWS
 drawLine('Cybernet Network IN', '2/9', 4, 'solid');
 drawLine('2/9', '2/1', 4, 'dashed');
 drawLine('2/1', 'DPI11', 4, 'dashed', true);
@@ -253,7 +250,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-clear.png';
+        link.download = 'niagara-switch-13-waterfall.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
