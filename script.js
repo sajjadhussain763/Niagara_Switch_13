@@ -18,7 +18,7 @@ const CONFIG = {
     ]
 };
 
-// CRITICAL: Explicit dimensions for correct export
+// Set explicit dimensions for high-res export
 svg.setAttribute('width', CONFIG.width);
 svg.setAttribute('height', CONFIG.height);
 svg.setAttribute('viewBox', `0 0 ${CONFIG.width} ${CONFIG.height}`);
@@ -36,6 +36,7 @@ CONFIG.flowColors.forEach((color, i) => {
         id: `arrow-${i}`, viewBox: '0 0 10 10', refX: '10', refY: '5',
         markerWidth: '4', markerHeight: '4', orient: 'auto-start-reverse'
     });
+    // Inline fill for export
     marker.appendChild(createEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: color }));
     defs.appendChild(marker);
 });
@@ -57,11 +58,11 @@ function getPoint(nodeId, side = 'bottom') {
     return { x: node.x, y: node.y };
 }
 
-// UI Components
 function drawPill(x, y, label) {
     const g = createEl('g');
-    g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, class: 'pill-container' }));
-    const t = createEl('text', { x, y: y + 5, 'text-anchor': 'middle', class: 'pill-label' });
+    // Inline styles for export
+    g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
+    const t = createEl('text', { x, y: y + 5, 'text-anchor': 'middle', fill: '#ffffff', style: 'font-family: Outfit, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 0.5px;' });
     t.textContent = label;
     g.appendChild(t);
     svg.appendChild(g);
@@ -77,7 +78,7 @@ const groupHeaders = [
     { x: 800, y: 790, text: 'MIRROR SERVERS' }
 ];
 groupHeaders.forEach(h => {
-    const t = createEl('text', { x: h.x, y: h.y, 'text-anchor': 'middle', style: 'font-family: Inter; font-weight: 800; font-size: 14px; fill: #94a3b8; letter-spacing: 2px;' });
+    const t = createEl('text', { x: h.x, y: h.y, 'text-anchor': 'middle', style: 'font-family: Outfit; font-weight: 800; font-size: 14px; fill: #94a3b8; letter-spacing: 2px;' });
     t.textContent = h.text;
     svg.appendChild(t);
 });
@@ -89,15 +90,15 @@ function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 730, height: 220, rx: 8, fill: '#ffffff', stroke: '#cbd5e1', 'stroke-width': 1 }));
     
-    const label = createEl('text', { x: startX + 10, y: startY + 10, 'text-anchor': 'start', style: 'font-family: monospace; font-size: 15px; fill: #1e293b; font-weight: 700; letter-spacing: 2px;' });
+    const label = createEl('text', { x: startX + 10, y: startY + 10, 'text-anchor': 'start', fill: '#1e293b', style: 'font-family: monospace; font-size: 15px; font-weight: 700; letter-spacing: 2px;' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
 
-    const group1T = createEl('text', { x: startX + 155, y: startY + 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
+    const group1T = createEl('text', { x: startX + 155, y: startY + 45, 'text-anchor': 'middle', fill: '#64748b', style: 'font-family: monospace; font-size: 10px; font-weight: 700;' });
     group1T.textContent = 'PORTS 1-8';
     g.appendChild(group1T);
 
-    const group2T = createEl('text', { x: startX + 535, y: startY + 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
+    const group2T = createEl('text', { x: startX + 535, y: startY + 45, 'text-anchor': 'middle', fill: '#64748b', style: 'font-family: monospace; font-size: 10px; font-weight: 700;' });
     group2T.textContent = 'PORTS 9-16';
     g.appendChild(group2T);
 
@@ -112,8 +113,8 @@ function drawModule(startX, startY, moduleNum, prefix) {
         const py = startY + row * 85 + 75;
         const portId = `${prefix}/${i + 1}`;
         const pg = createEl('g');
-        pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portWidth, height: CONFIG.portHeight, rx: 2, fill: '#fff', stroke: '#475569', 'stroke-width': 1 }));
-        const pt = createEl('text', { x: px + CONFIG.portWidth/2, y: py + 22, class: 'port-label' });
+        pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portWidth, height: CONFIG.portHeight, rx: 2, fill: '#ffffff', stroke: '#475569', 'stroke-width': 1 }));
+        const pt = createEl('text', { x: px + CONFIG.portWidth/2, y: py + 22, 'text-anchor': 'middle', fill: '#1e293b', style: 'font-family: monospace; font-size: 12px; font-weight: 700;' });
         pt.textContent = portId;
         pg.appendChild(pt);
         g.appendChild(pg);
@@ -128,12 +129,12 @@ drawModule(815, 240, 2, '2');
 function drawServer(s) {
     const isMirror = s.label.includes('MIRROR');
     const g = createEl('g');
-    g.appendChild(createEl('rect', { x: s.x - 90, y: s.y - 45, width: 180, height: 90, rx: 8, fill: isMirror ? '#fffcf0' : '#fff', stroke: isMirror ? '#fd7e14' : '#cbd5e1', 'stroke-width': 1.5 }));
+    g.appendChild(createEl('rect', { x: s.x - 90, y: s.y - 45, width: 180, height: 90, rx: 8, fill: isMirror ? '#fffcf0' : '#ffffff', stroke: isMirror ? '#fd7e14' : '#cbd5e1', 'stroke-width': 1.5 }));
     const iconG = createEl('g', { transform: `translate(${s.x - 15}, ${s.y - 35})` });
     iconG.appendChild(createEl('rect', { x: 0, y: 0, width: 30, height: 18, rx: 2, fill: '#cbd5e1', stroke: '#475569', 'stroke-width': 1 }));
     iconG.appendChild(createEl('line', { x1: 5, y1: 9, x2: 25, y2: 9, stroke: '#475569', 'stroke-width': 2 }));
     g.appendChild(iconG);
-    const t = createEl('text', { x: s.x, y: s.y + 25, 'text-anchor': 'middle', class: 'server-label', style: 'font-family: JetBrains Mono; font-size: 14px; font-weight: 700;' });
+    const t = createEl('text', { x: s.x, y: s.y + 25, 'text-anchor': 'middle', fill: '#1e293b', style: 'font-family: JetBrains Mono; font-size: 14px; font-weight: 700;' });
     t.textContent = s.label;
     g.appendChild(t);
     svg.appendChild(g);
@@ -153,39 +154,31 @@ const serverList = [
 serverList.forEach(drawServer);
 
 function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide = null) {
-    const fromNode = nodes[from];
-    const toNode = nodes[to];
-    
-    const isPortToPort = from.includes('/') && to.includes('/');
     const isToOUT = to === 'Cybernet Network OUT';
     const isFromIN = from === 'Cybernet Network IN';
+    const isPortToPort = from.includes('/') && to.includes('/');
     const isToServer = to.startsWith('DPI') || to.startsWith('MIR');
     const isFromServer = from.startsWith('DPI');
 
     let fromSide = 'bottom', toSide = 'top';
-
-    if (forceSide) {
-        fromSide = forceSide;
-        toSide = forceSide;
-    } else if (isToOUT) {
-        fromSide = 'top';
-        toSide = 'bottom';
-    } else if (isPortToPort) {
-        fromSide = 'top';
-        toSide = 'top';
-    } else if (isFromServer) {
-        fromSide = 'top';
-        toSide = 'bottom';
-    } else if (isToServer || isFromIN) {
-        fromSide = 'bottom';
-        toSide = 'top';
-    }
+    if (forceSide) { fromSide = toSide = forceSide; }
+    else if (isToOUT) { fromSide = 'top'; toSide = 'bottom'; }
+    else if (isPortToPort) { fromSide = 'top'; toSide = 'top'; }
+    else if (isFromServer) { fromSide = 'top'; toSide = 'bottom'; }
+    else if (isToServer || isFromIN) { fromSide = 'bottom'; toSide = 'top'; }
 
     const start = getPoint(from, fromSide);
     const end = getPoint(to, toSide);
     const color = CONFIG.flowColors[colorIndex];
     
-    const path = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${colorIndex})`, 'stroke-dasharray': style === 'dashed' ? '6 4' : '0' });
+    // CRITICAL: INLINE STYLES to prevent black blobs on export
+    const path = createEl('path', { 
+        fill: 'none', 
+        stroke: color, 
+        'stroke-width': 1.5,
+        'marker-end': `url(#arrow-${colorIndex})`, 
+        'stroke-dasharray': style === 'dashed' ? '6 4' : 'none' 
+    });
     
     let d;
     if (isToOUT) {
@@ -205,25 +198,22 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
     svg.appendChild(path);
 
     if (label) {
-        const t = createEl('text', { 'text-anchor': 'middle', style: `font-size: 9px; fill: ${color}; font-weight: 800; font-family: monospace; letter-spacing: 1px;` });
+        const t = createEl('text', { 'text-anchor': 'middle', fill: color, style: `font-size: 9px; font-weight: 800; font-family: monospace; letter-spacing: 1px;` });
         t.textContent = label;
-        
         if (isToOUT) {
             const lx = start.x + (end.x - start.x) * 0.12;
             const ly = start.y - 45;
-            t.setAttribute('x', lx);
-            t.setAttribute('y', ly);
+            t.setAttribute('x', lx); t.setAttribute('y', ly);
         } else {
             const midX = (start.x + end.x) / 2;
             const midY = (start.y + end.y) / 2 - 10;
-            t.setAttribute('x', midX);
-            t.setAttribute('y', midY);
+            t.setAttribute('x', midX); t.setAttribute('y', midY);
         }
         svg.appendChild(t);
     }
 }
 
-// Flows
+// Flows (M1)
 drawLine('Cybernet Network IN', '0/9', 0, 'solid', 'IN');
 drawLine('0/9', '0/7', 0, 'dashed', null, 'bottom');
 drawLine('0/9', '0/8', 0, 'dashed');
@@ -260,6 +250,7 @@ drawLine('0/1', '0/13', 3, 'dashed', null, 'bottom');
 drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed', 'OUT');
 drawLine('0/16', 'MIR2', 3, 'dashed', 'Mirror');
 
+// Flows (M2)
 drawLine('Cybernet Network IN', '2/9', 4, 'solid', 'IN');
 drawLine('2/9', '2/1', 4, 'dashed', null, 'bottom');
 drawLine('2/1', 'DPI11', 4, 'dashed');
@@ -292,19 +283,18 @@ drawLine('2/7', '2/13', 7, 'dashed', null, 'bottom');
 drawLine('2/13', 'Cybernet Network OUT', 7, 'dashed', 'OUT');
 drawLine('2/16', 'MIR4', 7, 'dashed', 'Mirror');
 
-document.getElementById('download-png').addEventListener('click', () => {
-    // CRITICAL: Ensure SVG has explicit dimensions before export
-    svg.setAttribute('width', CONFIG.width);
-    svg.setAttribute('height', CONFIG.height);
-    
+// Export Logic
+async function exportImage(format = 'png') {
     const svgData = new XMLSerializer().serializeToString(svg);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    const img = new Image();
-    const scale = 4; // High DPI export
-    
+    const scale = 4;
     canvas.width = CONFIG.width * scale;
     canvas.height = CONFIG.height * scale;
+    
+    const img = new Image();
+    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(svgBlob);
     
     img.onload = () => {
         ctx.fillStyle = 'white';
@@ -313,13 +303,14 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.drawImage(img, 0, 0);
         
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-full-diagram.png';
-        link.href = canvas.toDataURL('image/png', 1.0);
+        link.download = `niagara-switch-13.${format}`;
+        link.href = canvas.toDataURL(`image/${format === 'jpg' ? 'jpeg' : 'png'}`, 0.95);
         link.click();
+        URL.revokeObjectURL(url);
     };
-    
-    // Ensure all styles and attributes are captured correctly
-    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-    const url = URL.createObjectURL(svgBlob);
     img.src = url;
-});
+}
+
+document.getElementById('download-png').addEventListener('click', () => exportImage('png'));
+document.getElementById('download-jpg').addEventListener('click', () => exportImage('jpg'));
+document.getElementById('print-pdf').addEventListener('click', () => window.print());
