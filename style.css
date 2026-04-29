@@ -1,13 +1,13 @@
 :root {
-    --bg-color: #ffffff;
+    --bg-color: #f8f9fa;
     --text-color: #1a1a1a;
-    --module-border: #e0e0e0;
-    --port-bg: #f8f9fa;
-    --port-border: #ced4da;
+    --module-border: #007bff;
+    --port-bg: #ffffff;
+    --port-border: #333333;
     --flow-blue: #0066cc;
     --flow-green: #28a745;
     --flow-orange: #fd7e14;
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 }
@@ -20,6 +20,8 @@
 
 body {
     background-color: var(--bg-color);
+    background-image: radial-gradient(circle at 2px 2px, #e9ecef 1px, transparent 0);
+    background-size: 40px 40px;
     color: var(--text-color);
     font-family: var(--font-sans);
     overflow-x: hidden;
@@ -48,14 +50,15 @@ header h1 {
 
 #diagram-container {
     width: 100%;
-    max-width: 1400px;
-    height: 800px;
+    max-width: 1600px;
+    height: 900px;
     background: white;
-    border-radius: 12px;
+    border-radius: 20px;
     box-shadow: var(--shadow);
-    border: 1px solid #eee;
+    border: 4px solid #007bff;
     position: relative;
     overflow: hidden;
+    margin: 0 auto;
 }
 
 #network-svg {
@@ -119,48 +122,36 @@ button:hover {
 
 .server-node rect {
     fill: #fff;
-    stroke: #dee2e6;
-    stroke-width: 2;
-    rx: 6;
+    stroke: #adb5bd;
+    stroke-width: 1.5;
+    rx: 4;
 }
 
 .server-label {
-    font-weight: 600;
-    font-size: 12px;
-    fill: #212529;
+    font-weight: 700;
+    font-size: 13px;
+    fill: #333;
     text-anchor: middle;
 }
 
 .connection-line {
     fill: none;
-    stroke-width: 2.5;
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: stroke-width 0.2s;
 }
 
 .line-label {
-    font-size: 10px;
-    font-weight: 500;
-    fill: #6c757d;
+    font-size: 9px;
+    font-weight: 600;
+    fill: #495057;
+    background: white;
 }
 
-.arrowhead {
-    fill: context-stroke;
-}
-
-/* Specific flow colors */
-.flow-m1 { stroke: var(--flow-blue); }
-.flow-m2 { stroke: var(--flow-green); }
-.flow-mirror { stroke: var(--flow-orange); }
-
-.connector-dot {
-    fill: white;
-    stroke-width: 2;
-}
-
-.network-cloud {
-    fill: #f1f3f5;
-    stroke: #dee2e6;
-    stroke-dasharray: 4 4;
+.network-pill {
+    fill: #ffffff;
+    stroke: #adb5bd;
+    stroke-width: 1.5;
+    stroke-dasharray: 5 3;
 }

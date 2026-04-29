@@ -2,12 +2,12 @@ const svg = document.getElementById('network-svg');
 const NS = "http://www.w3.org/2000/svg";
 
 const CONFIG = {
-    width: 1400,
-    height: 800,
-    portSize: 40,
-    modulePadding: 60,
-    serverWidth: 140,
-    serverHeight: 60,
+    width: 1600,
+    height: 900,
+    portSize: 32,
+    modulePadding: 80,
+    serverWidth: 120,
+    serverHeight: 40,
     colors: {
         m1: '#0066cc',
         m2: '#28a745',
@@ -32,10 +32,10 @@ const defs = createEl('defs');
     const marker = createEl('marker', {
         id: `arrow-${type}`,
         viewBox: '0 0 10 10',
-        refX: '8',
+        refX: '9',
         refY: '5',
-        markerWidth: '4',
-        markerHeight: '4',
+        markerWidth: '5',
+        markerHeight: '5',
         orient: 'auto-start-reverse'
     });
     const path = createEl('path', {
@@ -49,32 +49,54 @@ svg.appendChild(defs);
 
 const nodes = {};
 
-function addNode(id, x, y, type, label) {
-    nodes[id] = { x, y, type, label };
+// Draw Pills for Cybernet
+function drawPill(x, y, label) {
+    const g = createEl('g');
+    const r = createEl('rect', {
+        x: x - 100,
+        y: y - 25,
+        width: 200,
+        height: 50,
+        rx: 25,
+        class: 'network-pill'
+    });
+    const t = createEl('text', {
+        x: x,
+        y: y + 5,
+        'text-anchor': 'middle',
+        class: 'server-label'
+    });
+    t.textContent = label;
+    g.appendChild(r);
+    g.appendChild(t);
+    svg.appendChild(g);
+    nodes[label] = { x, y };
 }
 
-// Layout Configuration
-const m1X = 100;
-const m2X = 800;
-const moduleY = 200;
-const serverY = 500;
-const mirrorY = 700;
+drawPill(400, 80, 'Cybernet Network IN');
+drawPill(1200, 80, 'Cybernet Network OUT');
 
 // Draw Modules
 function drawModule(startX, startY, moduleNum, prefix) {
-    const group = createEl('g', { class: 'module-group' });
+    const group = createEl('g');
     const rect = createEl('rect', {
         x: startX - 20,
-        y: startY - 40,
-        width: 500,
-        height: 180,
-        class: 'module-group'
+        y: startY - 30,
+        width: 580,
+        height: 120,
+        fill: '#f8f9fa',
+        stroke: '#dee2e6',
+        'stroke-width': 1,
+        rx: 10
     });
     const header = createEl('text', {
-        x: startX + 230,
-        y: startY - 50,
+        x: startX + 270,
+        y: startY - 40,
         class: 'module-header',
-        'text-anchor': 'middle'
+        'text-anchor': 'middle',
+        'font-size': '12px',
+        'font-weight': '700',
+        fill: '#6c757d'
     });
     header.textContent = `MODULE ${moduleNum}`;
     
@@ -86,8 +108,8 @@ function drawModule(startX, startY, moduleNum, prefix) {
         const row = Math.floor(i / 8);
         const col = i % 8;
         const portId = `${prefix}/${i + 1}`;
-        const px = startX + col * 60;
-        const py = startY + row * 80;
+        const px = startX + col * 70;
+        const py = startY + row * 45;
         
         const portG = createEl('g', { class: 'port-node' });
         const portRect = createEl('rect', {
@@ -96,12 +118,18 @@ function drawModule(startX, startY, moduleNum, prefix) {
             width: CONFIG.portSize,
             height: CONFIG.portSize,
             class: 'port-box',
-            id: `port-${portId.replace('/', '-')}`
+            id: `port-${portId.replace('/', '-')}`,
+            fill: 'white',
+            stroke: '#333',
+            'stroke-width': '1.5'
         });
         const portLabel = createEl('text', {
             x: px + CONFIG.portSize / 2,
-            y: py + CONFIG.portSize / 2 + 5,
-            class: 'port-label'
+            y: py + CONFIG.portSize / 2 + 4,
+            'font-family': 'JetBrains Mono',
+            'font-size': '10px',
+            'font-weight': '700',
+            'text-anchor': 'middle'
         });
         portLabel.textContent = portId;
         
@@ -109,25 +137,32 @@ function drawModule(startX, startY, moduleNum, prefix) {
         portG.appendChild(portLabel);
         group.appendChild(portG);
         
-        // Save port coordinates (center)
-        nodes[portId] = { x: px + CONFIG.portSize / 2, y: py + CONFIG.portSize / 2 };
+        // Save port coordinates
+        nodes[portId] = { 
+            x: px + CONFIG.portSize / 2, 
+            y: py + CONFIG.portSize / 2,
+            top: { x: px + CONFIG.portSize / 2, y: py },
+            bottom: { x: px + CONFIG.portSize / 2, y: py + CONFIG.portSize },
+            left: { x: px, y: py + CONFIG.portSize / 2 },
+            right: { x: px + CONFIG.portSize, y: py + CONFIG.portSize / 2 }
+        };
     }
     svg.appendChild(group);
 }
 
-drawModule(m1X, moduleY, 1, '0');
-drawModule(m2X, moduleY, 2, '2');
+drawModule(150, 250, 1, '0');
+drawModule(870, 250, 2, '2');
 
 // Draw Servers
 const serverConfigs = [
-    { id: 'DPI9', x: 200, y: serverY, label: 'DPI Server 9' },
-    { id: 'DPI10', x: 450, y: serverY, label: 'DPI Server 10' },
-    { id: 'DPA11', x: 850, y: serverY, label: 'DPA Server 11' },
-    { id: 'DPA12', x: 1100, y: serverY, label: 'DPA Server 12' },
-    { id: 'MIR1', x: 200, y: mirrorY, label: 'Mirror Server' },
-    { id: 'MIR2', x: 450, y: mirrorY, label: 'Mirror Server 2' },
-    { id: 'MIR3', x: 850, y: mirrorY, label: 'Mirror Server 3' },
-    { id: 'MIR4', x: 1100, y: mirrorY, label: 'Mirror Server 4' }
+    { id: 'DPI9', x: 300, y: 550, label: 'DPI Server 9' },
+    { id: 'DPI10', x: 500, y: 550, label: 'DPI Server 10' },
+    { id: 'DPA11', x: 1000, y: 550, label: 'DPA Server 11' },
+    { id: 'DPA12', x: 1250, y: 550, label: 'DPA Server 12' },
+    { id: 'MIR1', x: 300, y: 750, label: 'Mirror Server' },
+    { id: 'MIR2', x: 500, y: 750, label: 'Mirror Server 2' },
+    { id: 'MIR3', x: 1000, y: 750, label: 'Mirror Server 3' },
+    { id: 'MIR4', x: 1250, y: 750, label: 'Mirror Server 4' }
 ];
 
 serverConfigs.forEach(s => {
@@ -137,183 +172,154 @@ serverConfigs.forEach(s => {
         y: s.y - CONFIG.serverHeight / 2,
         width: CONFIG.serverWidth,
         height: CONFIG.serverHeight,
-        rx: 6
+        fill: 'white',
+        stroke: '#adb5bd',
+        'stroke-width': '1.5',
+        rx: 4
     });
     const t = createEl('text', {
         x: s.x,
         y: s.y + 5,
-        class: 'server-label'
+        class: 'server-label',
+        'font-size': '12px',
+        'font-weight': '700',
+        'text-anchor': 'middle'
     });
     t.textContent = s.label;
     g.appendChild(r);
     g.appendChild(t);
     svg.appendChild(g);
-    nodes[s.id] = { x: s.x, y: s.y };
+    nodes[s.id] = { 
+        x: s.x, 
+        y: s.y,
+        top: { x: s.x, y: s.y - CONFIG.serverHeight / 2 },
+        bottom: { x: s.x, y: s.y + CONFIG.serverHeight / 2 }
+    };
 });
 
-// Network Sources
-addNode('CYBER', 700, 50, 'source', 'Cybernet');
-const cyberCloud = createEl('path', {
-    d: 'M650,60 Q650,30 680,30 Q690,10 720,20 Q750,10 760,40 Q790,40 790,70 Q790,100 760,100 L640,100 Q610,100 610,70 Q610,40 640,50',
-    class: 'network-cloud'
-});
-const cyberText = createEl('text', { x: 700, y: 70, 'text-anchor': 'middle', class: 'server-label' });
-cyberText.textContent = 'Cybernet';
-// svg.appendChild(cyberCloud);
-// svg.appendChild(cyberText);
+// Improved Line Drawing
+function drawLine(from, to, type, label = '', bidirectional = false, fromSide = 'bottom', toSide = 'top') {
+    const startNode = nodes[from];
+    const endNode = nodes[to];
+    if (!startNode || !endNode) return;
 
-// Function to draw curved lines
-function drawLine(from, to, type, label = '', bidirectional = false) {
-    const start = nodes[from];
-    const end = nodes[to];
-    if (!start || !end) return;
+    const start = startNode[fromSide] || startNode;
+    const end = endNode[toSide] || endNode;
 
-    // Adjust start/end to touch boxes
-    let sx = start.x;
-    let sy = start.y;
-    let ex = end.x;
-    let ey = end.y;
-
-    // Simple offset logic to avoid overlapping lines
-    const dx = ex - sx;
-    const dy = ey - sy;
-    
     const path = createEl('path', {
-        class: `connection-line flow-${type}`,
-        'marker-end': `url(#arrow-${type})`
+        class: `connection-line`,
+        stroke: CONFIG.colors[type],
+        'marker-end': `url(#arrow-${type})`,
+        'stroke-dasharray': type === 'mirror' ? '0' : '0' // All solid for now
     });
 
-    // Control point for curve
-    const midX = (sx + ex) / 2;
-    const midY = (sy + ey) / 2;
-    const curveAmount = Math.abs(dx) > 100 ? 50 : 20;
-    
-    // Create a smooth cubic bezier
-    let d;
-    if (Math.abs(dy) < 50) {
-        // Horizontal-ish
-        d = `M ${sx} ${sy} C ${sx + dx/4} ${sy - curveAmount}, ${ex - dx/4} ${ey - curveAmount}, ${ex} ${ey}`;
-    } else {
-        // Vertical-ish
-        d = `M ${sx} ${sy} C ${sx} ${sy + dy/2}, ${ex} ${sy + dy/2}, ${ex} ${ey}`;
-    }
+    const midY = (start.y + end.y) / 2;
+    const d = `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`;
     
     path.setAttribute('d', d);
     svg.appendChild(path);
 
     if (bidirectional) {
         const revPath = createEl('path', {
-            class: `connection-line flow-${type}`,
+            class: `connection-line`,
+            stroke: CONFIG.colors[type],
             'marker-end': `url(#arrow-${type})`,
-            d: `M ${ex} ${ey} C ${ex} ${sy + dy/2 + 10}, ${sx} ${sy + dy/2 + 10}, ${sx} ${sy}`
+            d: `M ${end.x + 10} ${end.y} C ${end.x + 10} ${midY + 10}, ${start.x + 10} ${midY + 10}, ${start.x + 10} ${start.y}`
         });
         svg.appendChild(revPath);
     }
 
     if (label) {
-        const textPath = createEl('text', { class: 'line-label' });
-        const textNode = createEl('textPath', {
-            'href': `#path-${from}-${to}`, // would need unique IDs
-            'startOffset': '50%',
-            'text-anchor': 'middle'
-        });
-        // Simplification: Place text at midpoint
-        const labelText = createEl('text', {
+        const midX = (start.x + end.x) / 2;
+        const midYActual = (start.y + end.y) / 2;
+        const labelGroup = createEl('g');
+        const text = createEl('text', {
             x: midX,
-            y: midY - 10,
-            class: 'line-label',
-            'text-anchor': 'middle'
+            y: midYActual,
+            'text-anchor': 'middle',
+            'font-size': '9px',
+            'font-weight': '600',
+            fill: '#444'
         });
-        labelText.textContent = label;
-        svg.appendChild(labelText);
+        text.textContent = label;
+        // Background for text
+        const bbox = { width: label.length * 5, height: 12 };
+        const rect = createEl('rect', {
+            x: midX - bbox.width / 2,
+            y: midYActual - 9,
+            width: bbox.width,
+            height: bbox.height,
+            fill: 'white',
+            opacity: 0.8
+        });
+        labelGroup.appendChild(rect);
+        labelGroup.appendChild(text);
+        svg.appendChild(labelGroup);
     }
 }
 
 // --- MODULE 1 FLOWS (Blue) ---
-// Flow 1: Cable to 0/9 -> 0/7, 0/8
-drawLine('CYBER', '0/9', 'm1', '0/9');
-drawLine('0/9', '0/7', 'm1');
-drawLine('0/9', '0/8', 'm1');
-// 0/7 <-> DPI 9
-drawLine('0/7', 'DPI9', 'm1', '0/7 to DPI Server 9', true);
-// 0/7 -> 0/11
-drawLine('0/7', '0/11', 'm1');
-// 0/10 -> Mirror (Orange)
-drawLine('0/10', 'MIR1', 'mirror', '0/10 to Mirror Server');
+// Flow 1
+drawLine('Cybernet Network IN', '0/9', 'm1', '0/9', false, 'bottom', 'top');
+drawLine('0/9', '0/7', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/9', '0/8', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/7', 'DPI9', 'm1', '0/7 to DPI Server 9', true, 'bottom', 'top');
+drawLine('0/7', '0/11', 'm1', '0/7 to 0/11', false, 'bottom', 'bottom');
+drawLine('0/10', 'MIR1', 'mirror', '0/10 to Mirror Server', false, 'bottom', 'top');
 
-// Flow 2: Cable to 0/11 -> 0/5, 0/6
-drawLine('CYBER', '0/11', 'm1', '0/11');
-drawLine('0/11', '0/5', 'm1');
-drawLine('0/11', '0/6', 'm1');
-// 0/5 <-> DPI 9
-drawLine('0/5', 'DPI9', 'm1', '0/5 to DPI Server 9', true);
-// 0/5 -> 0/9
-drawLine('0/5', '0/9', 'm1');
-// 0/12 -> Mirror (Orange)
-drawLine('0/12', 'MIR1', 'mirror', '0/12 to Mirror Server');
+// Flow 2
+drawLine('Cybernet Network IN', '0/11', 'm1', '0/11', false, 'bottom', 'top');
+drawLine('0/11', '0/5', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/11', '0/6', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/5', 'DPI9', 'm1', '0/5 to DPI Server 9', true, 'bottom', 'top');
+drawLine('0/5', '0/9', 'm1', '0/5 to 0/9', false, 'bottom', 'bottom');
+drawLine('0/12', 'MIR1', 'mirror', '0/12 to Mirror Server', false, 'bottom', 'top');
 
-// Flow 3: Cable to 0/13 -> 0/3, 0/6
-drawLine('CYBER', '0/13', 'm1', '0/13');
-drawLine('0/13', '0/3', 'm1');
-drawLine('0/13', '0/6', 'm1');
-// 0/3 <-> DPI 10
-drawLine('0/3', 'DPI10', 'm1', '0/3 to DPI Server 10', true);
-// 0/3 -> 0/15
-drawLine('0/3', '0/15', 'm1');
-// 0/14 -> Mirror 2 (Orange)
-drawLine('0/14', 'MIR2', 'mirror', '0/14 to Mirror Server 2');
+// Flow 3
+drawLine('Cybernet Network IN', '0/13', 'm1', '0/13', false, 'bottom', 'top');
+drawLine('0/13', '0/3', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/13', '0/6', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/3', 'DPI10', 'm1', '0/3 to DPI Server 10', true, 'bottom', 'top');
+drawLine('0/3', '0/15', 'm1', '0/3 to 0/15', false, 'bottom', 'bottom');
+drawLine('0/14', 'MIR2', 'mirror', '0/14 to Mirror Server 2', false, 'bottom', 'top');
 
-// Flow 4: Cable to 0/15 -> 0/1, 0/8
-drawLine('CYBER', '0/15', 'm1', '0/15');
-drawLine('0/15', '0/1', 'm1');
-drawLine('0/15', '0/8', 'm1');
-// 0/1 <-> DPI 10
-drawLine('0/1', 'DPI10', 'm1', '0/1 to DPI Server 10', true);
-// 0/1 -> 0/13
-drawLine('0/1', '0/13', 'm1');
-// 0/16 -> Mirror 2 (Orange)
-drawLine('0/16', 'MIR2', 'mirror', '0/16 to Mirror Server 2');
+// Flow 4
+drawLine('Cybernet Network IN', '0/15', 'm1', '0/15', false, 'bottom', 'top');
+drawLine('0/15', '0/1', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/15', '0/8', 'm1', '', false, 'bottom', 'bottom');
+drawLine('0/1 hide', 'DPI10', 'm1', '0/1 to DPI Server 10', true, 'bottom', 'top'); // Fixed ID
+drawLine('0/1', 'DPI10', 'm1', '0/1 to DPI Server 10', true, 'bottom', 'top');
+drawLine('0/1', '0/13', 'm1', '0/1 to 0/13', false, 'bottom', 'bottom');
+drawLine('0/16', 'MIR2', 'mirror', '0/16 to Mirror Server 2', false, 'bottom', 'top');
 
 // --- MODULE 2 FLOWS (Green) ---
-// Flow 1: Cybernet -> 2/9 -> 2/1
-drawLine('CYBER', '2/9', 'm2', '2/9');
-drawLine('2/9', '2/1', 'm2');
-// 2/1 <-> DPA 11
-drawLine('2/1', 'DPA11', 'm2', '2/1 to DPA Server 11', true);
-// 2/1 -> 2/11
-drawLine('2/1', '2/11', 'm2');
-// 2/10 -> Mirror (Orange)
-drawLine('2/10', 'MIR1', 'mirror', '2/10 to Mirror Server');
+// Flow 1
+drawLine('Cybernet Network OUT', '2/9', 'm2', '2/9', false, 'bottom', 'top');
+drawLine('2/9', '2/1', 'm2', '2/9 to 2/1', false, 'bottom', 'bottom');
+drawLine('2/1', 'DPA11', 'm2', '2/1 to DPA Server 11', true, 'bottom', 'top');
+drawLine('2/1', '2/11', 'm2', '2/1 to 2/11', false, 'bottom', 'bottom');
+drawLine('2/10', 'MIR1', 'mirror', '2/10 to Mirror Server', false, 'bottom', 'top');
 
-// Flow 2: Cybernet -> 2/11 -> 2/3
-drawLine('CYBER', '2/11', 'm2', '2/11');
-drawLine('2/11', '2/3', 'm2');
-// 2/3 <-> DPA 11
-drawLine('2/3', 'DPA11', 'm2', '2/3 to DPA Server 11', true);
-// 2/3 -> 2/9
-drawLine('2/3', '2/9', 'm2');
-// 2/12 -> Mirror 3 (Orange)
-drawLine('2/12', 'MIR3', 'mirror', '2/12 to Mirror Server 3');
+// Flow 2
+drawLine('Cybernet Network OUT', '2/11', 'm2', '2/11', false, 'bottom', 'top');
+drawLine('2/11', '2/3', 'm2', '2/11 to 2/3', false, 'bottom', 'bottom');
+drawLine('2/3', 'DPA11', 'm2', '2/3 to DPA Server 11', true, 'bottom', 'top');
+drawLine('2/3', '2/9', 'm2', '2/3 to 2/9', false, 'bottom', 'bottom');
+drawLine('2/12', 'MIR3', 'mirror', '2/12 to Mirror Server 3', false, 'bottom', 'top');
 
-// Flow 3: Cybernet -> 2/13 -> 2/5
-drawLine('CYBER', '2/13', 'm2', '2/13');
-drawLine('2/13', '2/5', 'm2');
-// 2/5 <-> DPA 12
-drawLine('2/5', 'DPA12', 'm2', '2/5 to DPA Server 12', true);
-// 2/5 -> 2/15
-drawLine('2/5', '2/15', 'm2');
-// 2/14 -> Mirror 4 (Orange)
-drawLine('2/14', 'MIR4', 'mirror', '2/14 to Mirror Server 4');
+// Flow 3
+drawLine('Cybernet Network OUT', '2/13', 'm2', '2/13', false, 'bottom', 'top');
+drawLine('2/13', '2/5', 'm2', '2/13 to 2/5', false, 'bottom', 'bottom');
+drawLine('2/5', 'DPA12', 'm2', '2/5 to DPA Server 12', true, 'bottom', 'top');
+drawLine('2/5', '2/15', 'm2', '2/5 to 2/15', false, 'bottom', 'bottom');
+drawLine('2/14', 'MIR4', 'mirror', '2/14 to Mirror Server 4', false, 'bottom', 'top');
 
-// Flow 4: Cybernet -> 2/15 -> 2/7
-drawLine('CYBER', '2/15', 'm2', '2/15');
-drawLine('2/15', '2/7', 'm2');
-// 2/7 <-> DPA 12
-drawLine('2/7', 'DPA12', 'm2', '2/7 to DPA Server 12', true);
-// 2/7 -> 2/13
-drawLine('2/7', '2/13', 'm2');
-// 2/16 -> Mirror 4 (Orange)
-drawLine('2/16', 'MIR4', 'mirror', '2/16 to Mirror Server 4');
+// Flow 4
+drawLine('Cybernet Network OUT', '2/15', 'm2', '2/15', false, 'bottom', 'top');
+drawLine('2/15', '2/7', 'm2', '2/15 to 2/7', false, 'bottom', 'bottom');
+drawLine('2/7', 'DPA12', 'm2', '2/7 to DPA Server 12', true, 'bottom', 'top');
+drawLine('2/7', '2/13', 'm2', '2/7 to 2/13', false, 'bottom', 'bottom');
+drawLine('2/16', 'MIR4', 'mirror', '2/16 to Mirror Server 4', false, 'bottom', 'top');
 
 
 // Export functionality
@@ -323,8 +329,7 @@ document.getElementById('download-png').addEventListener('click', () => {
     const ctx = canvas.getContext('2d');
     const img = new Image();
     
-    // Scale for 8K
-    const scale = 4; 
+    const scale = 4; // 8K target
     canvas.width = CONFIG.width * scale;
     canvas.height = CONFIG.height * scale;
     
@@ -334,7 +339,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.scale(scale, scale);
         ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-network-diagram.png';
+        link.download = 'niagara-switch-13.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     };
