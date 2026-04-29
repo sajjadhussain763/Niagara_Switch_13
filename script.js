@@ -4,7 +4,8 @@ const NS = "http://www.w3.org/2000/svg";
 const CONFIG = {
     width: 1600,
     height: 900,
-    portSize: 42,
+    portWidth: 70,
+    portHeight: 35,
     flowColors: [
         '#8b5cf6', // Purple
         '#3b82f6', // Blue
@@ -64,36 +65,44 @@ function drawPill(x, y, label) {
     nodes[label] = { x, y, w: 240, h: 60 };
 }
 
-drawPill(400, 80, 'Cybernet Network IN');
-drawPill(1200, 80, 'Cybernet Network OUT');
+drawPill(450, 80, 'Cybernet Network IN');
+drawPill(1150, 80, 'Cybernet Network OUT');
 
 // Switch Frame
 svg.appendChild(createEl('rect', { x: 50, y: 180, width: 1500, height: 220, class: 'module-box' }));
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
-    g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 680, height: 160, class: 'module-inner-box' }));
-    const label = createEl('text', { x: startX + 320, y: startY - 40, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 14px; fill: #64748b' });
+    g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 700, height: 160, class: 'module-inner-box' }));
+    
+    // Separator line exactly between 8th and 9th port pairs
+    g.appendChild(createEl('line', {
+        x1: startX + 338, y1: startY - 20, x2: startX + 338, y2: startY + 140,
+        stroke: '#cbd5e1', 'stroke-width': 1
+    }));
+
+    const label = createEl('text', { x: startX + 340, y: startY - 40, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 14px; fill: #64748b' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
     
-    // SEQUENCE MATCHING PICTURE: Odds on top, Evens on bottom
+    // Exact Sequence: 0/1, 0/3, 0/5, 0/7 | 0/9, 0/11, 0/13, 0/15
     for (let i = 0; i < 16; i++) {
         const isEven = (i + 1) % 2 === 0;
-        const col = Math.floor(i / 2);
+        const pairIndex = Math.floor(i / 2); // 0 to 7
         const row = isEven ? 1 : 0;
+        const groupOffset = pairIndex >= 4 ? 20 : 0; // Gap between port 8 and 9
         
-        const px = startX + col * 85;
-        const py = startY + row * 70;
+        const px = startX + pairIndex * 80 + groupOffset;
+        const py = startY + row * 60;
         const portId = `${prefix}/${i + 1}`;
         
         const pg = createEl('g');
-        pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portSize, height: CONFIG.portSize, class: 'port-rect' }));
-        const pt = createEl('text', { x: px + 21, y: py + 25, class: 'port-label' });
+        pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portWidth, height: CONFIG.portHeight, class: 'port-rect' }));
+        const pt = createEl('text', { x: px + CONFIG.portWidth/2, y: py + 22, class: 'port-label' });
         pt.textContent = portId;
         pg.appendChild(pt);
         g.appendChild(pg);
-        nodes[portId] = { x: px + 21, y: py + 21, w: CONFIG.portSize, h: CONFIG.portSize };
+        nodes[portId] = { x: px + CONFIG.portWidth/2, y: py + CONFIG.portHeight/2, w: CONFIG.portWidth, h: CONFIG.portHeight };
     }
     svg.appendChild(g);
 }
@@ -124,19 +133,15 @@ servers.forEach(s => {
 });
 
 function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) {
-    const startSide = nodes[from].y < nodes[to].y ? 'bottom' : 'top';
-    const endSide = nodes[from].y < nodes[to].y ? 'top' : 'bottom';
+    const startNode = nodes[from];
+    const endNode = nodes[to];
     
-    // For horizontal lines between ports
-    let finalStartSide = startSide;
-    let finalEndSide = endSide;
-    if (Math.abs(nodes[from].y - nodes[to].y) < 10) {
-        finalStartSide = 'bottom';
-        finalEndSide = 'bottom';
-    }
-
-    const start = getPoint(from, finalStartSide);
-    const end = getPoint(to, finalEndSide);
+    // Smarter side selection: Top ports take connections from top, bottom from bottom
+    const startSide = startNode.y < endNode.y ? 'bottom' : 'top';
+    const endSide = startNode.y < endNode.y ? 'top' : 'bottom';
+    
+    const start = getPoint(from, startSide);
+    const end = getPoint(to, endSide);
     const color = colorIndex === 'mirror' ? CONFIG.mirrorColor : CONFIG.flowColors[colorIndex];
     const markerId = colorIndex === 'mirror' ? CONFIG.flowColors.length : colorIndex;
     
@@ -145,12 +150,8 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
         'stroke-dasharray': style === 'dashed' ? '6 4' : '0'
     });
     
-    // Refined Bezier for clarity
-    const distY = Math.abs(end.y - start.y);
-    const cpY = distY > 50 ? 0.5 : 1.2; // Adjust curve steepness
-    const cp1y = start.y + (end.y - start.y) * cpY;
-    const cp2y = start.y + (end.y - start.y) * (1 - cpY);
-    
+    const cp1y = start.y + (end.y - start.y) * 0.5;
+    const cp2y = start.y + (end.y - start.y) * 0.5;
     const d = `M ${start.x} ${start.y} C ${start.x} ${cp1y}, ${end.x} ${cp2y}, ${end.x} ${end.y}`;
     path.setAttribute('d', d);
     svg.appendChild(path);
@@ -166,16 +167,14 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
 }
 
 // --- MODULE 1 FLOWS ---
-// Flow 1
 drawLine('Cybernet Network IN', '0/9', 0, 'solid');
-drawLine('0/9', '0/7', 0, 'dashed'); // Logical
-drawLine('0/9', '0/8', 0, 'dashed'); // Logical
-drawLine('0/7', 'DPI9', 0, 'dashed', true); // Logical/Server
-drawLine('0/7', '0/11', 0, 'dashed'); // Logical
-drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed'); // Exit
+drawLine('0/9', '0/7', 0, 'dashed');
+drawLine('0/9', '0/8', 0, 'dashed');
+drawLine('0/7', 'DPI9', 0, 'dashed', true);
+drawLine('0/7', '0/11', 0, 'dashed');
+drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed');
 drawLine('0/10', 'MIR1', 'mirror', 'dashed');
 
-// Flow 2
 drawLine('Cybernet Network IN', '0/11', 1, 'solid');
 drawLine('0/11', '0/5', 1, 'dashed');
 drawLine('0/11', '0/6', 1, 'dashed');
@@ -184,7 +183,6 @@ drawLine('0/5', '0/9', 1, 'dashed');
 drawLine('0/9', 'Cybernet Network OUT', 1, 'dashed');
 drawLine('0/12', 'MIR1', 'mirror', 'dashed');
 
-// Flow 3
 drawLine('Cybernet Network IN', '0/13', 2, 'solid');
 drawLine('0/13', '0/3', 2, 'dashed');
 drawLine('0/13', '0/6', 2, 'dashed');
@@ -193,7 +191,6 @@ drawLine('0/3', '0/15', 2, 'dashed');
 drawLine('0/15', 'Cybernet Network OUT', 2, 'dashed');
 drawLine('0/14', 'MIR2', 'mirror', 'dashed');
 
-// Flow 4
 drawLine('Cybernet Network IN', '0/15', 3, 'solid');
 drawLine('0/15', '0/1', 3, 'dashed');
 drawLine('0/15', '0/8', 3, 'dashed');
@@ -203,7 +200,6 @@ drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed');
 drawLine('0/16', 'MIR2', 'mirror', 'dashed');
 
 // --- MODULE 2 FLOWS ---
-// Flow 1
 drawLine('Cybernet Network IN', '2/9', 4, 'solid');
 drawLine('2/9', '2/1', 4, 'dashed');
 drawLine('2/1', 'DPA11', 4, 'dashed', true);
@@ -211,7 +207,6 @@ drawLine('2/1', '2/11', 4, 'dashed');
 drawLine('2/11', 'Cybernet Network OUT', 4, 'dashed');
 drawLine('2/10', 'MIR1', 'mirror', 'dashed');
 
-// Flow 2
 drawLine('Cybernet Network IN', '2/11', 5, 'solid');
 drawLine('2/11', '2/3', 5, 'dashed');
 drawLine('2/3', 'DPA11', 5, 'dashed', true);
@@ -219,7 +214,6 @@ drawLine('2/3', '2/9', 5, 'dashed');
 drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed');
 drawLine('2/12', 'MIR3', 'mirror', 'dashed');
 
-// Flow 3
 drawLine('Cybernet Network IN', '2/13', 6, 'solid');
 drawLine('2/13', '2/5', 6, 'dashed');
 drawLine('2/5', 'DPA12', 6, 'dashed', true);
@@ -227,7 +221,6 @@ drawLine('2/5', '2/15', 6, 'dashed');
 drawLine('2/15', 'Cybernet Network OUT', 6, 'dashed');
 drawLine('2/14', 'MIR4', 'mirror', 'dashed');
 
-// Flow 4
 drawLine('Cybernet Network IN', '2/15', 7, 'solid');
 drawLine('2/15', '2/7', 7, 'dashed');
 drawLine('2/7', 'DPA12', 7, 'dashed', true);
@@ -248,7 +241,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-pro.png';
+        link.download = 'niagara-switch-13-exact.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
