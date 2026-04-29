@@ -53,7 +53,7 @@ function getPoint(nodeId, side = 'bottom') {
     return { x: node.x, y: node.y };
 }
 
-// UI Components - Pills moved higher to be the top-most element
+// Pills - Moved to Y=60 for clean header
 function drawPill(x, y, label) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, class: 'pill-container' }));
@@ -69,8 +69,8 @@ drawPill(1150, 60, 'Cybernet Network OUT');
 
 // Headers
 const headers = [
-    { x: 800, y: 550, text: 'DPI SERVERS' },
-    { x: 800, y: 780, text: 'MIRROR SERVERS' }
+    { x: 800, y: 560, text: 'DPI SERVERS' },
+    { x: 800, y: 790, text: 'MIRROR SERVERS' }
 ];
 headers.forEach(h => {
     const t = createEl('text', { x: h.x, y: h.y, 'text-anchor': 'middle', style: 'font-family: Inter; font-weight: 800; font-size: 14px; fill: #94a3b8; letter-spacing: 2px;' });
@@ -127,14 +127,14 @@ function drawServer(s) {
 }
 
 const serverList = [
-    { id: 'DPI9', x: 300, y: 640, label: 'DPI-9' },
-    { id: 'DPI10', x: 550, y: 640, label: 'DPI-10' },
-    { id: 'DPI11', x: 1050, y: 640, label: 'DPI-11' },
-    { id: 'DPI12', x: 1300, y: 640, label: 'DPI-12' },
-    { id: 'MIR1', x: 300, y: 870, label: 'MIRROR DPI-1' },
-    { id: 'MIR2', x: 550, y: 870, label: 'MIRROR DPI-2' },
-    { id: 'MIR3', x: 1050, y: 870, label: 'MIRROR DPI-3' },
-    { id: 'MIR4', x: 1300, y: 870, label: 'MIRROR DPI-4' }
+    { id: 'DPI9', x: 300, y: 660, label: 'DPI-9' },
+    { id: 'DPI10', x: 550, y: 660, label: 'DPI-10' },
+    { id: 'DPI11', x: 1050, y: 660, label: 'DPI-11' },
+    { id: 'DPI12', x: 1300, y: 660, label: 'DPI-12' },
+    { id: 'MIR1', x: 300, y: 880, label: 'MIRROR DPI-1' },
+    { id: 'MIR2', x: 550, y: 880, label: 'MIRROR DPI-2' },
+    { id: 'MIR3', x: 1050, y: 880, label: 'MIRROR DPI-3' },
+    { id: 'MIR4', x: 1300, y: 880, label: 'MIRROR DPI-4' }
 ];
 serverList.forEach(drawServer);
 
@@ -168,13 +168,13 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
     const path = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${colorIndex})`, 'stroke-dasharray': style === 'dashed' ? '6 4' : '0' });
     
     let d;
-    // REFINED: All arcs must stay BELOW the top pills (Y=60)
-    const maxY = 110; 
-    
-    if (isToOUT || isPortToPort) {
-        const dist = Math.abs(end.x - start.x);
-        // Shallow arc that never goes above Y=100
-        const arc = Math.min(dist * 0.2, 100);
+    if (isToOUT) {
+        // High Arc that stays BELOW Cybernet Pills (Y=60) but CLEAR of other lines
+        const arc = Math.min(Math.abs(end.x - start.x) * 0.2, 100);
+        d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
+    } else if (isPortToPort) {
+        // TIGHTER Arcs within the module area
+        const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
     } else {
         const midY = (start.y + end.y) / 2;
@@ -185,14 +185,13 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
 
     if (label) {
         const midX = (start.x + end.x) / 2;
-        const midY = isToOUT ? start.y - 60 : (start.y + end.y) / 2 - 10;
+        const midY = isToOUT ? start.y - 70 : (start.y + end.y) / 2 - 10;
         const t = createEl('text', { x: midX, y: midY, 'text-anchor': 'middle', style: `font-size: 10px; fill: ${color}; font-weight: 800; text-transform: uppercase;` });
         t.textContent = label;
         svg.appendChild(t);
     }
 }
 
-// Flows
 // M1
 drawLine('Cybernet Network IN', '0/9', 0, 'solid', 'IN');
 drawLine('0/9', '0/7', 0, 'dashed');
@@ -275,7 +274,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-final.png';
+        link.download = 'niagara-switch-13-compact.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
