@@ -53,7 +53,7 @@ function getPoint(nodeId, side = 'bottom') {
     return { x: node.x, y: node.y };
 }
 
-// Pills
+// UI Components
 function drawPill(x, y, label) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, class: 'pill-container' }));
@@ -207,72 +207,73 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
 }
 
 // Flows
+// M1 Logic
 drawLine('Cybernet Network IN', '0/9', 0, 'solid', 'IN');
-drawLine('0/9', '0/7', 0, 'dashed');
+drawLine('0/9', '0/7', 0, 'dashed', null, 'bottom'); // M1 Port 9 to 7 BELOW
 drawLine('0/9', '0/8', 0, 'dashed');
 drawLine('0/7', 'DPI9', 0, 'dashed');
 drawLine('DPI9', '0/7', 0, 'dashed');
-// EXCEPTION: 0/7 -> 0/11 BELOW PORTS
-drawLine('0/7', '0/11', 0, 'dashed', null, 'bottom');
+drawLine('0/7', '0/11', 0, 'dashed', null, 'bottom'); // M1 Port 7 to 11 BELOW
 drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed', 'OUT');
 drawLine('0/10', 'MIR1', 0, 'dashed', 'Mirror');
 
 drawLine('Cybernet Network IN', '0/11', 1, 'solid', 'IN');
-drawLine('0/11', '0/5', 1, 'dashed');
+drawLine('0/11', '0/5', 1, 'dashed', null, 'bottom'); // M1 Port 11 to 5 BELOW
 drawLine('0/11', '0/6', 1, 'dashed');
 drawLine('0/5', 'DPI9', 1, 'dashed');
 drawLine('DPI9', '0/5', 1, 'dashed');
-drawLine('0/5', '0/9', 1, 'dashed');
+drawLine('0/5', '0/9', 1, 'dashed', null, 'bottom'); // M1 Port 5 to 9 BELOW
 drawLine('0/9', 'Cybernet Network OUT', 1, 'dashed', 'OUT');
 drawLine('0/12', 'MIR1', 1, 'dashed', 'Mirror');
 
 drawLine('Cybernet Network IN', '0/13', 2, 'solid', 'IN');
-drawLine('0/13', '0/3', 2, 'dashed');
+drawLine('0/13', '0/3', 2, 'dashed', null, 'bottom'); // M1 Port 13 to 3 BELOW
 drawLine('0/13', '0/6', 2, 'dashed');
 drawLine('0/3', 'DPI10', 2, 'dashed');
 drawLine('DPI10', '0/3', 2, 'dashed');
-drawLine('0/3', '0/15', 2, 'dashed');
+drawLine('0/3', '0/15', 2, 'dashed', null, 'bottom'); // M1 Port 3 to 15 BELOW
 drawLine('0/15', 'Cybernet Network OUT', 2, 'dashed', 'OUT');
 drawLine('0/14', 'MIR2', 2, 'dashed', 'Mirror');
 
 drawLine('Cybernet Network IN', '0/15', 3, 'solid', 'IN');
-drawLine('0/15', '0/1', 3, 'dashed');
+drawLine('0/15', '0/1', 3, 'dashed', null, 'bottom'); // M1 Port 15 to 1 BELOW
 drawLine('0/15', '0/8', 3, 'dashed');
 drawLine('0/1', 'DPI10', 3, 'dashed');
 drawLine('DPI10', '0/1', 3, 'dashed');
-drawLine('0/1', '0/13', 3, 'dashed');
+drawLine('0/1', '0/13', 3, 'dashed', null, 'bottom'); // M1 Port 1 to 13 BELOW
 drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed', 'OUT');
 drawLine('0/16', 'MIR2', 3, 'dashed', 'Mirror');
 
+// M2 Logic
 drawLine('Cybernet Network IN', '2/9', 4, 'solid', 'IN');
-drawLine('2/9', '2/1', 4, 'dashed');
+drawLine('2/9', '2/1', 4, 'dashed', null, 'bottom'); // M2 Port 9 to 1 BELOW
 drawLine('2/1', 'DPI11', 4, 'dashed');
 drawLine('DPI11', '2/1', 4, 'dashed');
-drawLine('2/1', '2/11', 4, 'dashed');
+drawLine('2/1', '2/11', 4, 'dashed', null, 'bottom'); // M2 Port 1 to 11 BELOW
 drawLine('2/11', 'Cybernet Network OUT', 4, 'dashed', 'OUT');
 drawLine('2/10', 'MIR3', 4, 'dashed', 'Mirror');
 
 drawLine('Cybernet Network IN', '2/11', 5, 'solid', 'IN');
-drawLine('2/11', '2/3', 5, 'dashed');
+drawLine('2/11', '2/3', 5, 'dashed', null, 'bottom'); // M2 Port 11 to 3 BELOW
 drawLine('2/3', 'DPI11', 5, 'dashed');
 drawLine('DPI11', '2/3', 5, 'dashed');
-drawLine('2/3', '2/9', 5, 'dashed');
+drawLine('2/3', '2/9', 5, 'dashed', null, 'bottom'); // M2 Port 3 to 9 BELOW
 drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed', 'OUT');
 drawLine('2/12', 'MIR3', 5, 'dashed', 'Mirror');
 
 drawLine('Cybernet Network IN', '2/13', 6, 'solid', 'IN');
-drawLine('2/13', '2/5', 6, 'dashed');
+drawLine('2/13', '2/5', 6, 'dashed', null, 'bottom'); // M2 Port 13 to 5 BELOW
 drawLine('2/5', 'DPI12', 6, 'dashed');
 drawLine('DPI12', '2/5', 6, 'dashed');
-drawLine('2/5', '2/15', 6, 'dashed');
+drawLine('2/5', '2/15', 6, 'dashed', null, 'bottom'); // M2 Port 5 to 15 BELOW
 drawLine('2/15', 'Cybernet Network OUT', 6, 'dashed', 'OUT');
 drawLine('2/14', 'MIR4', 6, 'dashed', 'Mirror');
 
 drawLine('Cybernet Network IN', '2/15', 7, 'solid', 'IN');
-drawLine('2/15', '2/7', 7, 'dashed');
+drawLine('2/15', '2/7', 7, 'dashed', null, 'bottom'); // M2 Port 15 to 7 BELOW
 drawLine('2/7', 'DPI12', 7, 'dashed');
 drawLine('DPI12', '2/7', 7, 'dashed');
-drawLine('2/7', '2/13', 7, 'dashed');
+drawLine('2/7', '2/13', 7, 'dashed', null, 'bottom'); // M2 Port 7 to 13 BELOW
 drawLine('2/13', 'Cybernet Network OUT', 7, 'dashed', 'OUT');
 drawLine('2/16', 'MIR4', 7, 'dashed', 'Mirror');
 
@@ -288,7 +289,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-final-correction.png';
+        link.download = 'niagara-switch-13-all-bottom.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
