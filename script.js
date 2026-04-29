@@ -53,7 +53,7 @@ function getPoint(nodeId, side = 'bottom') {
     return { x: node.x, y: node.y };
 }
 
-// UI Components
+// Pills
 function drawPill(x, y, label) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, class: 'pill-container' }));
@@ -78,20 +78,16 @@ groupHeaders.forEach(h => {
     svg.appendChild(t);
 });
 
-// Primary Switch Container (Light blue background, thick blue border)
+// Primary Switch Container
 svg.appendChild(createEl('rect', { x: 40, y: 190, width: 1520, height: 280, rx: 12, fill: '#f0f7ff', stroke: '#3b82f6', 'stroke-width': 4 }));
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
-    // Module background
     g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 730, height: 220, rx: 8, fill: '#ffffff', stroke: '#cbd5e1', 'stroke-width': 1 }));
-    
-    // Module Label
     const label = createEl('text', { x: startX + 345, y: startY - 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 15px; fill: #1e293b; font-weight: 700; letter-spacing: 2px;' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
 
-    // Group Labels
     const group1T = createEl('text', { x: startX + 155, y: startY - 5, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
     group1T.textContent = 'PORTS 1-8';
     g.appendChild(group1T);
@@ -100,7 +96,6 @@ function drawModule(startX, startY, moduleNum, prefix) {
     group2T.textContent = 'PORTS 9-16';
     g.appendChild(group2T);
 
-    // Vertical Separator
     g.appendChild(createEl('line', { x1: startX + 345, y1: startY + 10, x2: startX + 345, y2: startY + 180, stroke: '#e2e8f0', 'stroke-width': 1 }));
 
     for (let i = 0; i < 16; i++) {
@@ -152,7 +147,7 @@ const serverList = [
 ];
 serverList.forEach(drawServer);
 
-function drawLine(from, to, colorIndex, style = 'solid', label = null) {
+function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide = null) {
     const fromNode = nodes[from];
     const toNode = nodes[to];
     
@@ -164,7 +159,10 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
 
     let fromSide = 'bottom', toSide = 'top';
 
-    if (isPortToPort || isToOUT) {
+    if (forceSide) {
+        fromSide = forceSide;
+        toSide = forceSide;
+    } else if (isPortToPort || isToOUT) {
         fromSide = 'top';
         toSide = 'top';
     } else if (isFromServer) {
@@ -185,9 +183,13 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
     if (isToOUT) {
         const arc = Math.min(Math.abs(end.x - start.x) * 0.15, 70);
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
-    } else if (isPortToPort) {
+    } else if (fromSide === 'top' && toSide === 'top') {
         const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
+    } else if (fromSide === 'bottom' && toSide === 'bottom') {
+        // ARCS BELOW PORTS
+        const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
+        d = `M ${start.x} ${start.y} C ${start.x} ${start.y + arc}, ${end.x} ${start.y + arc}, ${end.x} ${end.y}`;
     } else {
         const midY = (start.y + end.y) / 2;
         d = `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`;
@@ -210,7 +212,8 @@ drawLine('0/9', '0/7', 0, 'dashed');
 drawLine('0/9', '0/8', 0, 'dashed');
 drawLine('0/7', 'DPI9', 0, 'dashed');
 drawLine('DPI9', '0/7', 0, 'dashed');
-drawLine('0/7', '0/11', 0, 'dashed');
+// EXCEPTION: 0/7 -> 0/11 BELOW PORTS
+drawLine('0/7', '0/11', 0, 'dashed', null, 'bottom');
 drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed', 'OUT');
 drawLine('0/10', 'MIR1', 0, 'dashed', 'Mirror');
 
@@ -285,7 +288,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-pro-layout.png';
+        link.download = 'niagara-switch-13-final-correction.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
