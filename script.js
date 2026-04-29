@@ -84,20 +84,23 @@ svg.appendChild(createEl('rect', { x: 40, y: 190, width: 1520, height: 280, rx: 
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
+    // Module background
     g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 730, height: 220, rx: 8, fill: '#ffffff', stroke: '#cbd5e1', 'stroke-width': 1 }));
-    const label = createEl('text', { x: startX + 345, y: startY - 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 15px; fill: #1e293b; font-weight: 700; letter-spacing: 2px;' });
+    
+    // Module Label (TOP LEFT ALIGNMENT as per pic)
+    const label = createEl('text', { x: startX + 10, y: startY + 10, 'text-anchor': 'start', style: 'font-family: monospace; font-size: 15px; fill: #1e293b; font-weight: 700; letter-spacing: 2px;' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
 
-    const group1T = createEl('text', { x: startX + 155, y: startY - 5, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
+    const group1T = createEl('text', { x: startX + 155, y: startY + 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
     group1T.textContent = 'PORTS 1-8';
     g.appendChild(group1T);
 
-    const group2T = createEl('text', { x: startX + 535, y: startY - 5, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
+    const group2T = createEl('text', { x: startX + 535, y: startY + 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
     group2T.textContent = 'PORTS 9-16';
     g.appendChild(group2T);
 
-    g.appendChild(createEl('line', { x1: startX + 345, y1: startY + 10, x2: startX + 345, y2: startY + 180, stroke: '#e2e8f0', 'stroke-width': 1 }));
+    g.appendChild(createEl('line', { x1: startX + 345, y1: startY + 60, x2: startX + 345, y2: startY + 180, stroke: '#e2e8f0', 'stroke-width': 1 }));
 
     for (let i = 0; i < 16; i++) {
         const isEven = (i + 1) % 2 === 0;
@@ -105,7 +108,7 @@ function drawModule(startX, startY, moduleNum, prefix) {
         const row = isEven ? 1 : 0;
         const groupOffset = pairIndex >= 4 ? 40 : 0;
         const px = startX + pairIndex * 82 + groupOffset;
-        const py = startY + row * 85 + 25;
+        const py = startY + row * 85 + 75; // Shifting ports down to create more header space
         const portId = `${prefix}/${i + 1}`;
         const pg = createEl('g');
         pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portWidth, height: CONFIG.portHeight, rx: 2, fill: '#fff', stroke: '#475569', 'stroke-width': 1 }));
@@ -185,8 +188,8 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
     
     let d;
     if (isToOUT) {
-        const arc = 120;
-        // Standardize the curve to pass through the module box top area
+        const arc = 150;
+        // More horizontal arc exit from the module header area
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y + arc}, ${end.x} ${end.y}`;
     } else if (fromSide === 'top' && toSide === 'top') {
         const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
@@ -206,9 +209,9 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
         t.textContent = label;
         
         if (isToOUT) {
-            // Position "OUT" label along the dashed line within the module header area
-            const lx = start.x + (end.x - start.x) * 0.15;
-            const ly = start.y - 35;
+            // Position "OUT" label exactly as in the new reference pic
+            const lx = start.x + (end.x - start.x) * 0.12;
+            const ly = start.y - 45;
             t.setAttribute('x', lx);
             t.setAttribute('y', ly);
         } else {
@@ -269,14 +272,6 @@ drawLine('2/10', 'MIR3', 4, 'dashed', 'Mirror');
 drawLine('Cybernet Network IN', '2/11', 5, 'solid', 'IN');
 drawLine('2/11', '2/3', 5, 'dashed', null, 'bottom');
 drawLine('2/3', 'DPI11', 5, 'dashed');
-CONFIG.flowColors.forEach((color, i) => {
-    const marker = createEl('marker', {
-        id: `arrow-${i}`, viewBox: '0 0 10 10', refX: '10', refY: '5',
-        markerWidth: '4', markerHeight: '4', orient: 'auto-start-reverse'
-    });
-    marker.appendChild(createEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: color }));
-    defs.appendChild(marker);
-});
 drawLine('DPI11', '2/3', 5, 'dashed');
 drawLine('2/3', '2/9', 5, 'dashed', null, 'bottom');
 drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed', 'OUT');
@@ -310,7 +305,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-label-align.png';
+        link.download = 'niagara-switch-13-module-align.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
