@@ -1,64 +1,57 @@
 :root {
-    --bg-color: #f8f9fa;
-    --text-color: #1a1a1a;
-    --module-border: #007bff;
-    --port-bg: #ffffff;
-    --port-border: #333333;
-    --flow-blue: #0066cc;
-    --flow-green: #28a745;
-    --flow-orange: #fd7e14;
-    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --bg-color: #ffffff;
+    --text-color: #2c3e50;
+    --primary-blue: #0066cc;
+    --primary-green: #28a745;
+    --primary-orange: #fd7e14;
+    --module-box-border: #3b82f6;
+    --port-border: #94a3b8;
+    --port-text: #1e293b;
+    --font-sans: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    background-color: var(--bg-color);
-    background-image: radial-gradient(circle at 2px 2px, #e9ecef 1px, transparent 0);
-    background-size: 40px 40px;
-    color: var(--text-color);
+    background-color: #f1f5f9;
     font-family: var(--font-sans);
-    overflow-x: hidden;
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .app-container {
+    width: 100%;
+    max-width: 1600px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    width: 100vw;
-    min-height: 100vh;
-    padding: 2rem;
+    gap: 20px;
 }
 
 header {
-    margin-bottom: 2rem;
     text-align: center;
 }
 
-header h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    color: #333;
+#main-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #1e293b;
+    text-transform: uppercase;
 }
 
 #diagram-container {
-    width: 100%;
-    max-width: 1600px;
-    height: 900px;
     background: white;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    border: 4px solid #007bff;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    width: 100%;
+    height: 900px;
     position: relative;
-    overflow: hidden;
-    margin: 0 auto;
+    border: 1px solid #e2e8f0;
 }
 
 #network-svg {
@@ -67,31 +60,48 @@ header h1 {
     display: block;
 }
 
-.controls {
-    margin-top: 2rem;
+.toolbar {
     display: flex;
-    gap: 1rem;
+    justify-content: center;
 }
 
-button {
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    border: none;
-    background: #1a1a1a;
+.btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1e293b;
     color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-button:hover {
-    background: #333;
-    transform: translateY(-1px);
+.btn-primary:hover {
+    background: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* SVG Styles */
-.port-box {
-    fill: var(--port-bg);
+/* SVG Classes */
+.module-box {
+    fill: #f8fafc;
+    stroke: var(--module-box-border);
+    stroke-width: 3;
+    rx: 10;
+}
+
+.module-inner-box {
+    fill: #ffffff;
+    stroke: #e2e8f0;
+    stroke-width: 1;
+    rx: 6;
+}
+
+.port-rect {
+    fill: white;
     stroke: var(--port-border);
     stroke-width: 1.5;
     rx: 4;
@@ -101,37 +111,22 @@ button:hover {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 700;
-    fill: #495057;
+    fill: var(--port-text);
     text-anchor: middle;
 }
 
-.module-group {
-    fill: #fdfdfd;
-    stroke: #e9ecef;
+.server-rect {
+    fill: white;
+    stroke: #cbd5e1;
     stroke-width: 2;
     rx: 8;
 }
 
-.module-header {
-    font-weight: 700;
-    font-size: 14px;
-    fill: #adb5bd;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.server-node rect {
-    fill: #fff;
-    stroke: #adb5bd;
-    stroke-width: 1.5;
-    rx: 4;
-}
-
 .server-label {
-    font-weight: 700;
     font-size: 13px;
-    fill: #333;
-    text-anchor: middle;
+    font-weight: 800;
+    fill: #334155;
+    text-transform: uppercase;
 }
 
 .connection-line {
@@ -139,19 +134,24 @@ button:hover {
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
-    transition: stroke-width 0.2s;
 }
 
 .line-label {
-    font-size: 9px;
-    font-weight: 600;
-    fill: #495057;
-    background: white;
+    font-size: 10px;
+    font-weight: 700;
+    fill: #475569;
 }
 
-.network-pill {
-    fill: #ffffff;
-    stroke: #adb5bd;
+.pill-container {
+    fill: white;
+    stroke: #94a3b8;
     stroke-width: 1.5;
-    stroke-dasharray: 5 3;
+    stroke-dasharray: 6 4;
+    rx: 30;
+}
+
+.pill-label {
+    font-weight: 700;
+    font-size: 14px;
+    fill: #1e293b;
 }
