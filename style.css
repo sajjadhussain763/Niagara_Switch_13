@@ -1,0 +1,166 @@
+:root {
+    --bg-color: #ffffff;
+    --text-color: #1a1a1a;
+    --module-border: #e0e0e0;
+    --port-bg: #f8f9fa;
+    --port-border: #ced4da;
+    --flow-blue: #0066cc;
+    --flow-green: #28a745;
+    --flow-orange: #fd7e14;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100vw;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #333;
+}
+
+#diagram-container {
+    width: 100%;
+    max-width: 1400px;
+    height: 800px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid #eee;
+    position: relative;
+    overflow: hidden;
+}
+
+#network-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.controls {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    background: #1a1a1a;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+/* SVG Styles */
+.port-box {
+    fill: var(--port-bg);
+    stroke: var(--port-border);
+    stroke-width: 1.5;
+    rx: 4;
+}
+
+.port-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    fill: #495057;
+    text-anchor: middle;
+}
+
+.module-group {
+    fill: #fdfdfd;
+    stroke: #e9ecef;
+    stroke-width: 2;
+    rx: 8;
+}
+
+.module-header {
+    font-weight: 700;
+    font-size: 14px;
+    fill: #adb5bd;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.server-node rect {
+    fill: #fff;
+    stroke: #dee2e6;
+    stroke-width: 2;
+    rx: 6;
+}
+
+.server-label {
+    font-weight: 600;
+    font-size: 12px;
+    fill: #212529;
+    text-anchor: middle;
+}
+
+.connection-line {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke-width 0.2s;
+}
+
+.line-label {
+    font-size: 10px;
+    font-weight: 500;
+    fill: #6c757d;
+}
+
+.arrowhead {
+    fill: context-stroke;
+}
+
+/* Specific flow colors */
+.flow-m1 { stroke: var(--flow-blue); }
+.flow-m2 { stroke: var(--flow-green); }
+.flow-mirror { stroke: var(--flow-orange); }
+
+.connector-dot {
+    fill: white;
+    stroke-width: 2;
+}
+
+.network-cloud {
+    fill: #f1f3f5;
+    stroke: #dee2e6;
+    stroke-dasharray: 4 4;
+}
