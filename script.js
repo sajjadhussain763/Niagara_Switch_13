@@ -46,7 +46,6 @@ function getPoint(nodeId, side = 'bottom') {
     if (!node) return { x: 0, y: 0 };
     connectionCount[nodeId] = (connectionCount[nodeId] || 0) + 1;
     const count = connectionCount[nodeId];
-    // Dynamic spread based on node type
     const isPill = nodeId.includes('Network');
     const spread = (count - 1) * (isPill ? 15 : 8) - (isPill ? 50 : 15); 
     
@@ -166,7 +165,7 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
         toSide = forceSide;
     } else if (isToOUT) {
         fromSide = 'top';
-        toSide = 'bottom'; // ENTER AT THE BOTTOM EDGE OF THE PILL
+        toSide = 'bottom';
     } else if (isPortToPort) {
         fromSide = 'top';
         toSide = 'top';
@@ -186,8 +185,8 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
     
     let d;
     if (isToOUT) {
-        // High Arc that enters from BELOW the pill
-        const arc = Math.abs(end.x - start.x) * 0.15 + 40;
+        const arc = 120;
+        // Standardize the curve to pass through the module box top area
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y + arc}, ${end.x} ${end.y}`;
     } else if (fromSide === 'top' && toSide === 'top') {
         const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
@@ -203,10 +202,21 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null, forceSide
     svg.appendChild(path);
 
     if (label) {
-        const midX = (start.x + end.x) / 2;
-        const midY = isToOUT ? start.y - 70 : (start.y + end.y) / 2 - 10;
-        const t = createEl('text', { x: midX, y: midY, 'text-anchor': 'middle', style: `font-size: 10px; fill: ${color}; font-weight: 800; text-transform: uppercase;` });
+        const t = createEl('text', { 'text-anchor': 'middle', style: `font-size: 9px; fill: ${color}; font-weight: 800; font-family: monospace; letter-spacing: 1px;` });
         t.textContent = label;
+        
+        if (isToOUT) {
+            // Position "OUT" label along the dashed line within the module header area
+            const lx = start.x + (end.x - start.x) * 0.15;
+            const ly = start.y - 35;
+            t.setAttribute('x', lx);
+            t.setAttribute('y', ly);
+        } else {
+            const midX = (start.x + end.x) / 2;
+            const midY = (start.y + end.y) / 2 - 10;
+            t.setAttribute('x', midX);
+            t.setAttribute('y', midY);
+        }
         svg.appendChild(t);
     }
 }
@@ -259,6 +269,14 @@ drawLine('2/10', 'MIR3', 4, 'dashed', 'Mirror');
 drawLine('Cybernet Network IN', '2/11', 5, 'solid', 'IN');
 drawLine('2/11', '2/3', 5, 'dashed', null, 'bottom');
 drawLine('2/3', 'DPI11', 5, 'dashed');
+CONFIG.flowColors.forEach((color, i) => {
+    const marker = createEl('marker', {
+        id: `arrow-${i}`, viewBox: '0 0 10 10', refX: '10', refY: '5',
+        markerWidth: '4', markerHeight: '4', orient: 'auto-start-reverse'
+    });
+    marker.appendChild(createEl('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: color }));
+    defs.appendChild(marker);
+});
 drawLine('DPI11', '2/3', 5, 'dashed');
 drawLine('2/3', '2/9', 5, 'dashed', null, 'bottom');
 drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed', 'OUT');
@@ -292,7 +310,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-border-fix.png';
+        link.download = 'niagara-switch-13-label-align.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
