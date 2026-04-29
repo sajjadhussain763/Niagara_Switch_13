@@ -46,14 +46,14 @@ function getPoint(nodeId, side = 'bottom') {
     if (!node) return { x: 0, y: 0 };
     connectionCount[nodeId] = (connectionCount[nodeId] || 0) + 1;
     const count = connectionCount[nodeId];
-    const spread = (count - 1) * 8 - 15; 
+    const spread = (count - 1) * 10 - 20; 
     
     if (side === 'top') return { x: node.x + spread, y: node.y - node.h / 2 };
     if (side === 'bottom') return { x: node.x + spread, y: node.y + node.h / 2 };
     return { x: node.x, y: node.y };
 }
 
-// Draw UI Components
+// UI Components
 function drawPill(x, y, label) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, class: 'pill-container' }));
@@ -64,29 +64,28 @@ function drawPill(x, y, label) {
     nodes[label] = { x, y, w: 240, h: 60 };
 }
 
-drawPill(450, 100, 'Cybernet Network IN');
-drawPill(1150, 100, 'Cybernet Network OUT');
+drawPill(450, 80, 'Cybernet Network IN');
+drawPill(1150, 80, 'Cybernet Network OUT');
 
 // Headers
 const headers = [
-    { x: 800, y: 560, text: 'DPI SERVERS' },
-    { x: 800, y: 770, text: 'MIRROR SERVERS' }
+    { x: 800, y: 550, text: 'DPI SERVERS' },
+    { x: 800, y: 780, text: 'MIRROR SERVERS' }
 ];
 headers.forEach(h => {
-    const t = createEl('text', { x: h.x, y: h.y, 'text-anchor': 'middle', style: 'font-family: Inter; font-weight: 800; font-size: 14px; fill: #64748b; letter-spacing: 2px;' });
+    const t = createEl('text', { x: h.x, y: h.y, 'text-anchor': 'middle', style: 'font-family: Inter; font-weight: 800; font-size: 14px; fill: #94a3b8; letter-spacing: 2px;' });
     t.textContent = h.text;
     svg.appendChild(t);
 });
 
 // Switch Frame
-svg.appendChild(createEl('rect', { x: 40, y: 220, width: 1520, height: 260, rx: 12, fill: 'none', stroke: '#3b82f6', 'stroke-width': 3 }));
+svg.appendChild(createEl('rect', { x: 40, y: 190, width: 1520, height: 260, rx: 12, fill: 'none', stroke: '#3b82f6', 'stroke-width': 3 }));
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 720, height: 200, rx: 8, fill: '#fff', stroke: '#cbd5e1', 'stroke-width': 1 }));
     g.appendChild(createEl('line', { x1: startX + 350, y1: startY - 20, x2: startX + 350, y2: startY + 180, stroke: '#e2e8f0', 'stroke-width': 1 }));
-
-    const label = createEl('text', { x: startX + 350, y: startY - 40, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 14px; fill: #475569; font-weight: 800;' });
+    const label = createEl('text', { x: startX + 350, y: startY - 40, 'text-anchor': 'middle', style: 'font-family: Inter; font-size: 14px; fill: #475569; font-weight: 800;' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
     
@@ -109,19 +108,17 @@ function drawModule(startX, startY, moduleNum, prefix) {
     svg.appendChild(g);
 }
 
-drawModule(80, 260, 1, '0');
-drawModule(800, 260, 2, '2');
+drawModule(80, 230, 1, '0');
+drawModule(800, 230, 2, '2');
 
 function drawServer(s) {
     const isMirror = s.label.includes('MIRROR');
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: s.x - 90, y: s.y - 45, width: 180, height: 90, rx: 8, fill: isMirror ? '#fffcf0' : '#fff', stroke: isMirror ? '#fd7e14' : '#cbd5e1', 'stroke-width': 1.5 }));
-    
     const iconG = createEl('g', { transform: `translate(${s.x - 15}, ${s.y - 35})` });
     iconG.appendChild(createEl('rect', { x: 0, y: 0, width: 30, height: 18, rx: 2, fill: '#cbd5e1', stroke: '#475569', 'stroke-width': 1 }));
     iconG.appendChild(createEl('line', { x1: 5, y1: 9, x2: 25, y2: 9, stroke: '#475569', 'stroke-width': 2 }));
     g.appendChild(iconG);
-
     const t = createEl('text', { x: s.x, y: s.y + 25, 'text-anchor': 'middle', class: 'server-label', style: 'font-family: JetBrains Mono; font-size: 14px; font-weight: 700;' });
     t.textContent = s.label;
     g.appendChild(t);
@@ -130,14 +127,14 @@ function drawServer(s) {
 }
 
 const serverList = [
-    { id: 'DPI9', x: 300, y: 650, label: 'DPI-9' },
-    { id: 'DPI10', x: 550, y: 650, label: 'DPI-10' },
-    { id: 'DPI11', x: 1050, y: 650, label: 'DPI-11' },
-    { id: 'DPI12', x: 1300, y: 650, label: 'DPI-12' },
-    { id: 'MIR1', x: 300, y: 860, label: 'MIRROR DPI-1' },
-    { id: 'MIR2', x: 550, y: 860, label: 'MIRROR DPI-2' },
-    { id: 'MIR3', x: 1050, y: 860, label: 'MIRROR DPI-3' },
-    { id: 'MIR4', x: 1300, y: 860, label: 'MIRROR DPI-4' }
+    { id: 'DPI9', x: 300, y: 640, label: 'DPI-9' },
+    { id: 'DPI10', x: 550, y: 640, label: 'DPI-10' },
+    { id: 'DPI11', x: 1050, y: 640, label: 'DPI-11' },
+    { id: 'DPI12', x: 1300, y: 640, label: 'DPI-12' },
+    { id: 'MIR1', x: 300, y: 870, label: 'MIRROR DPI-1' },
+    { id: 'MIR2', x: 550, y: 870, label: 'MIRROR DPI-2' },
+    { id: 'MIR3', x: 1050, y: 870, label: 'MIRROR DPI-3' },
+    { id: 'MIR4', x: 1300, y: 870, label: 'MIRROR DPI-4' }
 ];
 serverList.forEach(drawServer);
 
@@ -145,13 +142,32 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
     const fromNode = nodes[from];
     const toNode = nodes[to];
     
-    // Exact Switch 12 routing style: smooth direct S-curves
-    let fromSide = fromNode.y < toNode.y ? 'bottom' : 'top';
-    let toSide = fromNode.y < toNode.y ? 'top' : 'bottom';
+    // ANALYZING PIC STYLE:
+    // 1. Port-to-Port = TOP (Arc Above)
+    // 2. Port-to-OUT = TOP (Arc High Above switch)
+    // 3. Port-to-Server = BOTTOM (Direct down)
+    // 4. IN-to-Port = TOP (Enter from above)
     
-    // Internal arcs stay clear
-    if (from.includes('/') && to.includes('/')) {
+    const isPortToPort = from.includes('/') && to.includes('/');
+    const isToOUT = to === 'Cybernet Network OUT';
+    const isFromIN = from === 'Cybernet Network IN';
+    const isToServer = to.startsWith('DPI') || to.startsWith('MIR');
+    const isFromServer = from.startsWith('DPI');
+
+    let fromSide = 'bottom';
+    let toSide = 'top';
+
+    if (isPortToPort || isToOUT) {
         fromSide = 'top';
+        toSide = 'top';
+    } else if (isFromServer) {
+        fromSide = 'top';
+        toSide = 'bottom';
+    } else if (isToServer) {
+        fromSide = 'bottom';
+        toSide = 'top';
+    } else if (isFromIN) {
+        fromSide = 'bottom';
         toSide = 'top';
     }
 
@@ -162,10 +178,16 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
     const path = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${colorIndex})`, 'stroke-dasharray': style === 'dashed' ? '6 4' : '0' });
     
     let d;
-    if (from.includes('/') && to.includes('/')) {
-        const arc = Math.abs(end.x - start.x) * 0.4 + 30;
+    if (isToOUT) {
+        // High Arc clearing the switch frame
+        const arc = Math.abs(end.x - start.x) * 0.3 + 120;
+        d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
+    } else if (isPortToPort) {
+        // Standard arc above ports
+        const arc = Math.abs(end.x - start.x) * 0.4 + 40;
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
     } else {
+        // S-curve waterfall
         const midY = (start.y + end.y) / 2;
         d = `M ${start.x} ${start.y} C ${start.x} ${midY}, ${end.x} ${midY}, ${end.x} ${end.y}`;
     }
@@ -174,14 +196,14 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
 
     if (label) {
         const midX = (start.x + end.x) / 2;
-        const midY = (start.y + end.y) / 2 - 10;
+        const midY = isToOUT ? start.y - 140 : (start.y + end.y) / 2 - 10;
         const t = createEl('text', { x: midX, y: midY, 'text-anchor': 'middle', style: `font-size: 10px; fill: ${color}; font-weight: 800; text-transform: uppercase;` });
         t.textContent = label;
         svg.appendChild(t);
     }
 }
 
-// Flows
+// Flow Mapping
 // M1
 drawLine('Cybernet Network IN', '0/9', 0, 'solid', 'IN');
 drawLine('0/9', '0/7', 0, 'dashed');
@@ -264,7 +286,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-pro.png';
+        link.download = 'niagara-switch-13-exact.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
