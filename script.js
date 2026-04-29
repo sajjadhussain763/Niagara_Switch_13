@@ -7,16 +7,15 @@ const CONFIG = {
     portWidth: 70,
     portHeight: 35,
     flowColors: [
-        '#8b5cf6', // Purple
-        '#3b82f6', // Blue
-        '#06b6d4', // Cyan
-        '#10b981', // Emerald
-        '#f59e0b', // Amber
-        '#ef4444', // Red
-        '#ec4899', // Pink
-        '#6366f1'  // Indigo
-    ],
-    mirrorColor: '#fd7e14' // Orange
+        '#8b5cf6', // Purple (Flow 1)
+        '#3b82f6', // Blue (Flow 2)
+        '#06b6d4', // Cyan (Flow 3)
+        '#10b981', // Emerald (Flow 4)
+        '#f59e0b', // Amber (Flow 5)
+        '#ef4444', // Red (Flow 6)
+        '#ec4899', // Pink (Flow 7)
+        '#6366f1'  // Indigo (Flow 8)
+    ]
 };
 
 svg.setAttribute('viewBox', `0 0 ${CONFIG.width} ${CONFIG.height}`);
@@ -29,7 +28,7 @@ function createEl(tag, attrs = {}) {
 
 // Markers for arrows
 const defs = createEl('defs');
-[...CONFIG.flowColors, CONFIG.mirrorColor].forEach((color, i) => {
+CONFIG.flowColors.forEach((color, i) => {
     const marker = createEl('marker', {
         id: `arrow-${i}`, viewBox: '0 0 10 10', refX: '10', refY: '5',
         markerWidth: '4', markerHeight: '4', orient: 'auto-start-reverse'
@@ -75,7 +74,6 @@ function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 700, height: 160, class: 'module-inner-box' }));
     g.appendChild(createEl('line', { x1: startX + 338, y1: startY - 20, x2: startX + 338, y2: startY + 140, stroke: '#cbd5e1', 'stroke-width': 1 }));
-
     const label = createEl('text', { x: startX + 340, y: startY - 40, 'text-anchor': 'middle', class: 'server-label', style: 'font-size: 14px; fill: #64748b' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
@@ -102,28 +100,19 @@ function drawModule(startX, startY, moduleNum, prefix) {
 drawModule(100, 220, 1, '0');
 drawModule(820, 220, 2, '2');
 
-// Servers with the new icon style
 function drawServer(s) {
     const isMirror = s.label.includes('MIRROR');
     const g = createEl('g');
-    
-    // Main Container
     g.appendChild(createEl('rect', { 
         x: s.x - 90, y: s.y - 45, width: 180, height: 90, 
-        class: isMirror ? 'server-rect-mirror' : 'server-rect',
         fill: isMirror ? '#fffcf0' : '#fff',
         stroke: isMirror ? '#fd7e14' : '#cbd5e1',
-        'stroke-width': 1.5,
-        rx: 8
+        'stroke-width': 1.5, rx: 8
     }));
-
-    // Server Blade Icon
     const iconG = createEl('g', { transform: `translate(${s.x - 15}, ${s.y - 35})` });
     iconG.appendChild(createEl('rect', { x: 0, y: 0, width: 30, height: 18, rx: 2, fill: '#cbd5e1', stroke: '#475569', 'stroke-width': 1 }));
     iconG.appendChild(createEl('line', { x1: 5, y1: 9, x2: 25, y2: 9, stroke: '#475569', 'stroke-width': 2 }));
     g.appendChild(iconG);
-
-    // Label
     const t = createEl('text', { x: s.x, y: s.y + 25, 'text-anchor': 'middle', class: 'server-label', style: 'font-family: JetBrains Mono; font-size: 14px; font-weight: 700;' });
     t.textContent = s.label;
     g.appendChild(t);
@@ -151,8 +140,8 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
     const endSide = startNode.y < endNode.y ? 'top' : 'bottom';
     const start = getPoint(from, startSide);
     const end = getPoint(to, endSide);
-    const color = colorIndex === 'mirror' ? CONFIG.mirrorColor : CONFIG.flowColors[colorIndex];
-    const markerId = colorIndex === 'mirror' ? CONFIG.flowColors.length : colorIndex;
+    const color = CONFIG.flowColors[colorIndex];
+    const markerId = colorIndex;
     const path = createEl('path', { class: 'connection-line', stroke: color, 'marker-end': `url(#arrow-${markerId})`, 'stroke-dasharray': style === 'dashed' ? '6 4' : '0' });
     const cp1y = start.y + (end.y - start.y) * 0.5;
     const cp2y = start.y + (end.y - start.y) * 0.5;
@@ -165,66 +154,75 @@ function drawLine(from, to, colorIndex, style = 'solid', bidirectional = false) 
     }
 }
 
-// Flow Mappings
+// MODULE 1 FLOWS
+// Flow 1 (Purple)
 drawLine('Cybernet Network IN', '0/9', 0, 'solid');
 drawLine('0/9', '0/7', 0, 'dashed');
 drawLine('0/9', '0/8', 0, 'dashed');
 drawLine('0/7', 'DPI9', 0, 'dashed', true);
 drawLine('0/7', '0/11', 0, 'dashed');
 drawLine('0/11', 'Cybernet Network OUT', 0, 'dashed');
-drawLine('0/10', 'MIR1', 'mirror', 'dashed');
+drawLine('0/10', 'MIR1', 0, 'dashed'); // Mirror color matches connection
 
+// Flow 2 (Blue)
 drawLine('Cybernet Network IN', '0/11', 1, 'solid');
 drawLine('0/11', '0/5', 1, 'dashed');
 drawLine('0/11', '0/6', 1, 'dashed');
 drawLine('0/5', 'DPI9', 1, 'dashed', true);
 drawLine('0/5', '0/9', 1, 'dashed');
 drawLine('0/9', 'Cybernet Network OUT', 1, 'dashed');
-drawLine('0/12', 'MIR1', 'mirror', 'dashed');
+drawLine('0/12', 'MIR1', 1, 'dashed'); // Mirror color matches connection
 
+// Flow 3 (Cyan)
 drawLine('Cybernet Network IN', '0/13', 2, 'solid');
 drawLine('0/13', '0/3', 2, 'dashed');
 drawLine('0/13', '0/6', 2, 'dashed');
 drawLine('0/3', 'DPI10', 2, 'dashed', true);
 drawLine('0/3', '0/15', 2, 'dashed');
 drawLine('0/15', 'Cybernet Network OUT', 2, 'dashed');
-drawLine('0/14', 'MIR2', 'mirror', 'dashed');
+drawLine('0/14', 'MIR2', 2, 'dashed');
 
+// Flow 4 (Emerald)
 drawLine('Cybernet Network IN', '0/15', 3, 'solid');
 drawLine('0/15', '0/1', 3, 'dashed');
 drawLine('0/15', '0/8', 3, 'dashed');
 drawLine('0/1', 'DPI10', 3, 'dashed', true);
 drawLine('0/1', '0/13', 3, 'dashed');
 drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed');
-drawLine('0/16', 'MIR2', 'mirror', 'dashed');
+drawLine('0/16', 'MIR2', 3, 'dashed');
 
+// MODULE 2 FLOWS
+// Flow 1 (Amber)
 drawLine('Cybernet Network IN', '2/9', 4, 'solid');
 drawLine('2/9', '2/1', 4, 'dashed');
 drawLine('2/1', 'DPI11', 4, 'dashed', true);
 drawLine('2/1', '2/11', 4, 'dashed');
 drawLine('2/11', 'Cybernet Network OUT', 4, 'dashed');
-drawLine('2/10', 'MIR1', 'mirror', 'dashed');
+drawLine('2/10', 'MIR3', 4, 'dashed'); // FIXED: MIR3 instead of MIR1, Color matches Amber
 
+// Flow 2 (Red)
 drawLine('Cybernet Network IN', '2/11', 5, 'solid');
 drawLine('2/11', '2/3', 5, 'dashed');
 drawLine('2/3', 'DPI11', 5, 'dashed', true);
 drawLine('2/3', '2/9', 5, 'dashed');
 drawLine('2/9', 'Cybernet Network OUT', 5, 'dashed');
-drawLine('2/12', 'MIR3', 'mirror', 'dashed');
+drawLine('2/12', 'MIR3', 5, 'dashed'); // Color matches Red
 
+// Flow 3 (Pink)
 drawLine('Cybernet Network IN', '2/13', 6, 'solid');
 drawLine('2/13', '2/5', 6, 'dashed');
 drawLine('2/5', 'DPI12', 6, 'dashed', true);
 drawLine('2/5', '2/15', 6, 'dashed');
 drawLine('2/15', 'Cybernet Network OUT', 6, 'dashed');
-drawLine('2/14', 'MIR4', 'mirror', 'dashed');
+drawLine('2/14', 'MIR4', 6, 'dashed');
 
+// Flow 4 (Indigo)
 drawLine('Cybernet Network IN', '2/15', 7, 'solid');
 drawLine('2/15', '2/7', 7, 'dashed');
 drawLine('2/7', 'DPI12', 7, 'dashed', true);
 drawLine('2/7', '2/13', 7, 'dashed');
 drawLine('2/13', 'Cybernet Network OUT', 7, 'dashed');
-drawLine('2/16', 'MIR4', 'mirror', 'dashed');
+drawLine('2/16', 'MIR4', 7, 'dashed');
 
 document.getElementById('download-png').addEventListener('click', () => {
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -238,7 +236,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-final.png';
+        link.download = 'niagara-switch-13-final-v2.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
