@@ -53,7 +53,7 @@ function getPoint(nodeId, side = 'bottom') {
     return { x: node.x, y: node.y };
 }
 
-// Pills - Moved to Y=60 for clean header
+// UI Components
 function drawPill(x, y, label) {
     const g = createEl('g');
     g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, class: 'pill-container' }));
@@ -68,34 +68,48 @@ drawPill(450, 60, 'Cybernet Network IN');
 drawPill(1150, 60, 'Cybernet Network OUT');
 
 // Headers
-const headers = [
+const groupHeaders = [
     { x: 800, y: 560, text: 'DPI SERVERS' },
     { x: 800, y: 790, text: 'MIRROR SERVERS' }
 ];
-headers.forEach(h => {
+groupHeaders.forEach(h => {
     const t = createEl('text', { x: h.x, y: h.y, 'text-anchor': 'middle', style: 'font-family: Inter; font-weight: 800; font-size: 14px; fill: #94a3b8; letter-spacing: 2px;' });
     t.textContent = h.text;
     svg.appendChild(t);
 });
 
-// Switch Frame
-svg.appendChild(createEl('rect', { x: 40, y: 220, width: 1520, height: 260, rx: 12, fill: 'none', stroke: '#3b82f6', 'stroke-width': 3 }));
+// Primary Switch Container (Light blue background, thick blue border)
+svg.appendChild(createEl('rect', { x: 40, y: 190, width: 1520, height: 280, rx: 12, fill: '#f0f7ff', stroke: '#3b82f6', 'stroke-width': 4 }));
 
 function drawModule(startX, startY, moduleNum, prefix) {
     const g = createEl('g');
-    g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 720, height: 200, rx: 8, fill: '#fff', stroke: '#cbd5e1', 'stroke-width': 1 }));
-    g.appendChild(createEl('line', { x1: startX + 350, y1: startY - 20, x2: startX + 350, y2: startY + 180, stroke: '#e2e8f0', 'stroke-width': 1 }));
-    const label = createEl('text', { x: startX + 350, y: startY - 40, 'text-anchor': 'middle', style: 'font-family: Inter; font-size: 14px; fill: #475569; font-weight: 800;' });
+    // Module background
+    g.appendChild(createEl('rect', { x: startX - 20, y: startY - 20, width: 730, height: 220, rx: 8, fill: '#ffffff', stroke: '#cbd5e1', 'stroke-width': 1 }));
+    
+    // Module Label
+    const label = createEl('text', { x: startX + 345, y: startY - 45, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 15px; fill: #1e293b; font-weight: 700; letter-spacing: 2px;' });
     label.textContent = `MODULE ${moduleNum}`;
     g.appendChild(label);
-    
+
+    // Group Labels
+    const group1T = createEl('text', { x: startX + 155, y: startY - 5, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
+    group1T.textContent = 'PORTS 1-8';
+    g.appendChild(group1T);
+
+    const group2T = createEl('text', { x: startX + 535, y: startY - 5, 'text-anchor': 'middle', style: 'font-family: monospace; font-size: 10px; fill: #64748b; font-weight: 700;' });
+    group2T.textContent = 'PORTS 9-16';
+    g.appendChild(group2T);
+
+    // Vertical Separator
+    g.appendChild(createEl('line', { x1: startX + 345, y1: startY + 10, x2: startX + 345, y2: startY + 180, stroke: '#e2e8f0', 'stroke-width': 1 }));
+
     for (let i = 0; i < 16; i++) {
         const isEven = (i + 1) % 2 === 0;
         const pairIndex = Math.floor(i / 2);
         const row = isEven ? 1 : 0;
-        const groupOffset = pairIndex >= 4 ? 20 : 0;
-        const px = startX + pairIndex * 85 + groupOffset;
-        const py = startY + row * 80;
+        const groupOffset = pairIndex >= 4 ? 40 : 0;
+        const px = startX + pairIndex * 82 + groupOffset;
+        const py = startY + row * 85 + 25;
         const portId = `${prefix}/${i + 1}`;
         const pg = createEl('g');
         pg.appendChild(createEl('rect', { x: px, y: py, width: CONFIG.portWidth, height: CONFIG.portHeight, rx: 2, fill: '#fff', stroke: '#475569', 'stroke-width': 1 }));
@@ -108,8 +122,8 @@ function drawModule(startX, startY, moduleNum, prefix) {
     svg.appendChild(g);
 }
 
-drawModule(80, 260, 1, '0');
-drawModule(800, 260, 2, '2');
+drawModule(85, 240, 1, '0');
+drawModule(815, 240, 2, '2');
 
 function drawServer(s) {
     const isMirror = s.label.includes('MIRROR');
@@ -169,11 +183,9 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
     
     let d;
     if (isToOUT) {
-        // High Arc that stays BELOW Cybernet Pills (Y=60) but CLEAR of other lines
-        const arc = Math.min(Math.abs(end.x - start.x) * 0.2, 100);
+        const arc = Math.min(Math.abs(end.x - start.x) * 0.15, 70);
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
     } else if (isPortToPort) {
-        // TIGHTER Arcs within the module area
         const arc = Math.min(Math.abs(end.x - start.x) * 0.35, 60);
         d = `M ${start.x} ${start.y} C ${start.x} ${start.y - arc}, ${end.x} ${start.y - arc}, ${end.x} ${end.y}`;
     } else {
@@ -192,7 +204,7 @@ function drawLine(from, to, colorIndex, style = 'solid', label = null) {
     }
 }
 
-// M1
+// Flows
 drawLine('Cybernet Network IN', '0/9', 0, 'solid', 'IN');
 drawLine('0/9', '0/7', 0, 'dashed');
 drawLine('0/9', '0/8', 0, 'dashed');
@@ -229,7 +241,6 @@ drawLine('0/1', '0/13', 3, 'dashed');
 drawLine('0/13', 'Cybernet Network OUT', 3, 'dashed', 'OUT');
 drawLine('0/16', 'MIR2', 3, 'dashed', 'Mirror');
 
-// M2
 drawLine('Cybernet Network IN', '2/9', 4, 'solid', 'IN');
 drawLine('2/9', '2/1', 4, 'dashed');
 drawLine('2/1', 'DPI11', 4, 'dashed');
@@ -274,7 +285,7 @@ document.getElementById('download-png').addEventListener('click', () => {
         ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
         const link = document.createElement('a');
-        link.download = 'niagara-switch-13-compact.png';
+        link.download = 'niagara-switch-13-pro-layout.png';
         link.href = canvas.toDataURL('image/png'); link.click();
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
