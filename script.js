@@ -60,17 +60,32 @@ function getPoint(nodeId, side = 'bottom') {
 
 function drawPill(x, y, label) {
     const g = createEl('g');
-    // Inline styles for export
-    g.appendChild(createEl('rect', { x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
-    const t = createEl('text', { x, y: y + 5, 'text-anchor': 'middle', fill: '#ffffff', style: 'font-family: Outfit, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 0.5px;' });
+    // Updated style: White background, dashed border, dark text to match reference
+    g.appendChild(createEl('rect', { 
+        x: x - 120, y: y - 30, width: 240, height: 60, rx: 30, 
+        fill: '#ffffff', stroke: '#94a3b8', 'stroke-width': 1.5, 
+        'stroke-dasharray': '6 4' 
+    }));
+    const t = createEl('text', { 
+        x, y: y + 5, 'text-anchor': 'middle', fill: '#1e293b', 
+        style: 'font-family: Outfit, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: 0.5px;' 
+    });
     t.textContent = label;
     g.appendChild(t);
     svg.appendChild(g);
     nodes[label] = { x, y, w: 240, h: 60 };
 }
 
-drawPill(450, 60, 'Cybernet Network IN');
-drawPill(1150, 60, 'Cybernet Network OUT');
+// Add Title inside SVG for export
+const mainTitle = createEl('text', { 
+    x: 800, y: 50, 'text-anchor': 'middle', fill: '#1e293b', 
+    style: 'font-family: Outfit, sans-serif; font-weight: 800; font-size: 36px; letter-spacing: 4px; text-transform: uppercase;' 
+});
+mainTitle.textContent = 'NIAGARA SWITCH_13';
+svg.appendChild(mainTitle);
+
+drawPill(450, 130, 'Cybernet Network IN');
+drawPill(1150, 130, 'Cybernet Network OUT');
 
 // Headers
 const groupHeaders = [
